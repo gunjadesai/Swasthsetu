@@ -25,7 +25,7 @@ export default async function HomePage() {
     <main className="mx-auto flex min-h-screen max-w-5xl flex-col justify-center px-6 py-16">
       <div className="max-w-2xl">
         <p className="text-sm font-medium text-teal-600">
-          Rural Health Platform
+          Swasthsetu
         </p>
         <h1 className="mt-3 text-4xl font-semibold leading-tight text-ink sm:text-5xl">
           One place to reach a doctor, wherever the nearest clinic is.

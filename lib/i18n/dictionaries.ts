@@ -9,17 +9,18 @@
 // bilingual behaviour actually matters. Add keys here as you localize
 // more pages; anything missing falls back to English via t().
 
-export const locales = ["en", "hi"] as const;
+export const locales = ["en", "hi", "gu"] as const;
 export type Locale = (typeof locales)[number];
 export const defaultLocale: Locale = "en";
 export const LOCALE_COOKIE = "NEXT_LOCALE";
 
 export const dictionaries = {
   en: {
-    "app.name": "Rural Health",
+    "app.name": "Swasthsetu",
     "lang.switch": "Language",
     "lang.en": "English",
     "lang.hi": "Hindi",
+    "lang.gu": "Gujarati",
 
     "nav.dashboard": "Dashboard",
     "nav.appointments": "Appointments",
@@ -79,10 +80,11 @@ export const dictionaries = {
     "common.loading": "Loading...",
   },
   hi: {
-    "app.name": "ग्रामीण स्वास्थ्य",
+    "app.name": "स्वास्थ्य सेतु",
     "lang.switch": "भाषा",
     "lang.en": "अंग्रेज़ी",
     "lang.hi": "हिंदी",
+    "lang.gu": "गुजराती",
 
     "nav.dashboard": "डैशबोर्ड",
     "nav.appointments": "अपॉइंटमेंट",
@@ -140,6 +142,70 @@ export const dictionaries = {
     "common.cancel": "रद्द करें",
     "common.submit": "जमा करें",
     "common.loading": "लोड हो रहा है...",
+  },
+  gu: {
+    "app.name": "સ્વાસ્થ્ય સેતુ",
+    "lang.switch": "ભાષા",
+    "lang.en": "અંગ્રેજી",
+    "lang.hi": "હિન્દી",
+    "lang.gu": "ગુજરાતી",
+
+    "nav.dashboard": "ડેશબોર્ડ",
+    "nav.appointments": "એપોઇન્ટમેન્ટ",
+    "nav.book": "એપોઇન્ટમેન્ટ બુક કરો",
+    "nav.profile": "પ્રોફાઇલ",
+    "nav.availability": "ઉપલબ્ધતા",
+    "nav.triage": "લક્ષણ તપાસ",
+    "nav.queue": "કતારની સ્થિતિ",
+    "nav.emergency": "કટોકટી",
+    "nav.schemes": "આરોગ્ય યોજનાઓ",
+    "nav.feedback": "પ્રતિસાદ",
+    "nav.medicineSearch": "દવા શોધો",
+    "nav.registerPatient": "દર્દી નોંધો",
+    "nav.visits": "ફિલ્ડ મુલાકાત",
+    "nav.directory": "ગામ/હોસ્પિટલ ડિરેક્ટરી",
+    "nav.referrals": "રેફરલ્સ",
+    "nav.labOrders": "લેબ ઓર્ડર",
+    "nav.pharmacyStock": "દવા સ્ટોક",
+    "nav.ambulanceRequests": "એમ્બ્યુલન્સ વિનંતીઓ",
+    "nav.reports": "અહેવાલો",
+
+    "landing.title": "દરેક ગામ માટે આરોગ્ય સેવાની પહોંચ",
+    "landing.subtitle":
+      "ડોક્ટરની મુલાકાત બુક કરો, લક્ષણોની તપાસ કરાવો, એમ્બ્યુલન્સ માટે વિનંતી કરો, અને તમારા આરોગ્ય રેકોર્ડ ટ્રેક કરો - તમારી ભાષામાં.",
+    "landing.signup": "ખાતું બનાવો",
+    "landing.login": "સાઇન ઇન કરો",
+
+    "auth.login.title": "સાઇન ઇન કરો",
+    "auth.signup.title": "તમારું ખાતું બનાવો",
+    "auth.role.label": "હું છું...",
+
+    "triage.title": "લક્ષણ તપાસ",
+    "triage.subtitle":
+      "આગળ શું કરવું તે જાણવા માટે થોડા પ્રશ્નોના જવાબ આપો. આ ડોક્ટરની સલાહનો વિકલ્પ નથી.",
+    "triage.submit": "લક્ષણો તપાસો",
+    "triage.result.SelfCare": "હાલ પૂરતું ઘરે સ્વ-સંભાળ પૂરતી હોવી જોઈએ.",
+    "triage.result.BookAppointment": "કૃપા કરીને ડોક્ટર સાથે નિયમિત એપોઇન્ટમેન્ટ બુક કરો.",
+    "triage.result.VisitPHC": "કૃપા કરીને ટૂંક સમયમાં તમારા નજીકના પીએચસી/હોસ્પિટલની મુલાકાત લો.",
+    "triage.result.Teleconsult": "હમણાં ડોક્ટર સાથે વિડિયો પરામર્શ શરૂ કરો.",
+    "triage.result.CallAmbulance": "આ તાત્કાલિક લાગે છે - હમણાં એમ્બ્યુલન્સ માટે વિનંતી કરો.",
+
+    "emergency.title": "કટોકટી",
+    "emergency.callAmbulance": "એમ્બ્યુલન્સ માટે વિનંતી કરો",
+    "emergency.subtitle": "અમે તમારું સ્થાન નજીકની ઉપલબ્ધ એમ્બ્યુલન્સ સાથે શેર કરીશું.",
+
+    "schemes.title": "સરકારી આરોગ્ય યોજનાઓ",
+    "schemes.eligibility": "પાત્રતા",
+
+    "queue.title": "કતારની સ્થિતિ",
+    "queue.yourToken": "તમારો ટોકન નંબર",
+    "queue.waiting": "રાહ જોઈ રહ્યાં છીએ",
+    "queue.called": "તમને બોલાવવામાં આવી રહ્યા છે - કૃપા કરીને કાઉન્ટર પર જાઓ",
+
+    "common.save": "સાચવો",
+    "common.cancel": "રદ કરો",
+    "common.submit": "સબમિટ કરો",
+    "common.loading": "લોડ થઈ રહ્યું છે...",
   },
 } as const satisfies Record<Locale, Record<string, string>>;
 

@@ -24,7 +24,7 @@ const plexSansDevanagari = IBM_Plex_Sans_Devanagari({
 });
 
 export const metadata: Metadata = {
-  title: "Rural Health Platform",
+  title: "Swasthsetu",
   description:
     "Accessibility and quality of public healthcare services in rural and underserved areas.",
 };
