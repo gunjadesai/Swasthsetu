@@ -1,0 +1,26 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-sage-50 text-ink;
+  }
+
+  /* Keyboard focus must stay visible - many rural users will be on
+     low-end Android browsers where hover states mean nothing and a
+     visible focus ring is the only affordance keyboard/switch users
+     get. */
+  :focus-visible {
+    outline: 2px solid theme("colors.teal.500");
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
