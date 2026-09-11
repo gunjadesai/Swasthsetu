@@ -1,5 +1,31 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { createServerClient } from "@supabase/ssr";
+import { createServerClient, type CookieOptions } from "@supabase/ssr";
+import type { RoleName } from "@/lib/types";
+
+// Every role's own section and the dashboard it's redirected home to.
+// Keeping this as one map (instead of one if-block per role) is what
+// lets middleware stay flat as roles are added across Phases 2-6.
+const ROLE_HOME: Record<RoleName, string> = {
+  Patient: "/patient/dashboard",
+  ASHAWorker: "/asha/dashboard",
+  Doctor: "/doctor/dashboard",
+  HospitalStaff: "/hospital/dashboard",
+  LabStaff: "/lab/dashboard",
+  PharmacyStaff: "/pharmacy/dashboard",
+  AmbulanceProvider: "/ambulance/dashboard",
+  Administrator: "/admin/dashboard",
+};
+
+const PROTECTED_PREFIXES = [
+  "/patient",
+  "/asha",
+  "/doctor",
+  "/hospital",
+  "/lab",
+  "/pharmacy",
+  "/ambulance",
+  "/admin",
+];
 
 export async function middleware(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
@@ -12,7 +38,9 @@ export async function middleware(request: NextRequest) {
         getAll() {
           return request.cookies.getAll();
         },
-        setAll(cookiesToSet) {
+        setAll(
+          cookiesToSet: { name: string; value: string; options: CookieOptions }[]
+        ) {
           cookiesToSet.forEach(({ name, value }) =>
             request.cookies.set(name, value)
           );
@@ -31,8 +59,9 @@ export async function middleware(request: NextRequest) {
 
   const path = request.nextUrl.pathname;
   const isAuthRoute = path.startsWith("/login") || path.startsWith("/signup");
-  const isProtectedRoute =
-    path.startsWith("/patient") || path.startsWith("/doctor");
+  const isProtectedRoute = PROTECTED_PREFIXES.some((prefix) =>
+    path.startsWith(prefix)
+  );
 
   if (!user && isProtectedRoute) {
     const url = request.nextUrl.clone();
@@ -46,8 +75,8 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  // Keep a patient out of /doctor/* and vice versa - one extra query,
-  // only on the routes where it matters.
+  // Keep each role inside its own section - one extra query, only on
+  // the routes where it matters.
   if (user && isProtectedRoute) {
     const { data: profile } = await supabase
       .from("profiles")
@@ -56,16 +85,21 @@ export async function middleware(request: NextRequest) {
       .single();
 
     const roleName = (profile?.roles as { role_name?: string } | null)
-      ?.role_name;
+      ?.role_name as RoleName | undefined;
 
-    if (path.startsWith("/patient") && roleName && roleName !== "Patient") {
+    const ownPrefix = roleName ? ROLE_HOME[roleName]?.split("/")[1] : undefined;
+    const matchedPrefix = PROTECTED_PREFIXES.find((prefix) =>
+      path.startsWith(prefix)
+    );
+
+    if (
+      roleName &&
+      ownPrefix &&
+      matchedPrefix &&
+      matchedPrefix !== `/${ownPrefix}`
+    ) {
       const url = request.nextUrl.clone();
-      url.pathname = "/doctor/dashboard";
-      return NextResponse.redirect(url);
-    }
-    if (path.startsWith("/doctor") && roleName && roleName !== "Doctor") {
-      const url = request.nextUrl.clone();
-      url.pathname = "/patient/dashboard";
+      url.pathname = ROLE_HOME[roleName];
       return NextResponse.redirect(url);
     }
   }

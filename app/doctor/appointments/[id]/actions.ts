@@ -17,6 +17,11 @@ const schema = z.object({
   symptoms: z.string().optional(),
   notes: z.string().optional(),
   itemsJson: z.string().optional(),
+  referHospitalId: z.coerce.number().optional(),
+  referReason: z.string().optional(),
+  referUrgency: z.enum(["Normal", "Urgent", "Emergency"]).optional(),
+  labId: z.coerce.number().optional(),
+  labTestId: z.coerce.number().optional(),
 });
 
 export type CompleteState = { error?: string };
@@ -31,6 +36,11 @@ export async function completeConsult(
     symptoms: formData.get("symptoms") || undefined,
     notes: formData.get("notes") || undefined,
     itemsJson: formData.get("itemsJson") || undefined,
+    referHospitalId: formData.get("referHospitalId") || undefined,
+    referReason: formData.get("referReason") || undefined,
+    referUrgency: formData.get("referUrgency") || undefined,
+    labId: formData.get("labId") || undefined,
+    labTestId: formData.get("labTestId") || undefined,
   });
 
   if (!parsed.success) return { error: "Please check the form." };
@@ -116,6 +126,35 @@ export async function completeConsult(
       }))
     );
     if (itemsError) return { error: itemsError.message };
+  }
+
+  if (parsed.data.referHospitalId) {
+    const { data: doctorHospital } = await supabase
+      .from("doctors")
+      .select("primary_hospital_id")
+      .eq("doctor_id", doctor.doctor_id)
+      .single();
+
+    const { error: referralError } = await supabase.from("referrals").insert({
+      patient_id: appointment.patient_id,
+      referred_from_hospital_id: doctorHospital?.primary_hospital_id ?? null,
+      referred_to_hospital_id: parsed.data.referHospitalId,
+      referred_by_doctor_id: doctor.doctor_id,
+      reason: parsed.data.referReason ?? null,
+      urgency_level: parsed.data.referUrgency ?? "Normal",
+    });
+    if (referralError) return { error: referralError.message };
+  }
+
+  if (parsed.data.labId && parsed.data.labTestId) {
+    const { error: labOrderError } = await supabase.from("lab_test_orders").insert({
+      record_id: record.record_id,
+      patient_id: appointment.patient_id,
+      lab_id: parsed.data.labId,
+      test_id: parsed.data.labTestId,
+      ordered_by_doctor_id: doctor.doctor_id,
+    });
+    if (labOrderError) return { error: labOrderError.message };
   }
 
   const { error: statusError } = await supabase

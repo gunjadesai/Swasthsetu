@@ -17,7 +17,7 @@ export default async function PatientProfilePage() {
     supabase
       .from("patients")
       .select(
-        "date_of_birth, gender, blood_group, address, emergency_contact"
+        "patient_id, date_of_birth, gender, blood_group, address, emergency_contact, health_id_number"
       )
       .eq("profile_id", user!.id)
       .single(),
@@ -48,6 +48,21 @@ export default async function PatientProfilePage() {
           emergencyContact: patient?.emergency_contact ?? "",
         }}
       />
+
+      {patient?.patient_id && (
+        <div className="mt-8 rounded-md border border-line bg-white p-4">
+          <p className="text-sm font-medium text-ink">Health ID</p>
+          <p className="text-sm text-ink/60">{patient.health_id_number ?? "Not yet assigned"}</p>
+          <a
+            href={`/api/fhir/patient/${patient.patient_id}/summary`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-2 inline-block text-sm font-medium text-teal-600"
+          >
+            Export my health record (FHIR)
+          </a>
+        </div>
+      )}
     </div>
   );
 }

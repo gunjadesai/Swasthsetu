@@ -3,13 +3,43 @@
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
+import type { SelfServeRoleName } from "@/lib/types";
+
+const SELF_SERVE_ROLES = [
+  "Patient",
+  "ASHAWorker",
+  "Doctor",
+  "HospitalStaff",
+  "LabStaff",
+  "PharmacyStaff",
+  "AmbulanceProvider",
+] as const;
+
+// Roles that need a follow-up onboarding step (pick a village/hospital/
+// lab/pharmacy/vehicle) before their dashboard is usable. That step
+// needs an authenticated session to read the lookup tables (RLS on
+// villages/hospitals/etc. is "authenticated" only, not "anon" - see
+// supabase/schema.sql section 16), so it happens as page two, not
+// inline in this action.
+const ONBOARDING_PATH: Record<string, string> = {
+  ASHAWorker: "/asha/onboarding",
+  HospitalStaff: "/hospital/onboarding",
+  LabStaff: "/lab/onboarding",
+  PharmacyStaff: "/pharmacy/onboarding",
+  AmbulanceProvider: "/ambulance/onboarding",
+};
+
+const DASHBOARD_PATH: Record<string, string> = {
+  Patient: "/patient/dashboard",
+  Doctor: "/doctor/dashboard",
+};
 
 const signupSchema = z.object({
   fullName: z.string().min(2, "Enter your full name"),
   phone: z.string().min(8, "Enter a valid phone number"),
   email: z.string().email("Enter a valid email address"),
   password: z.string().min(8, "Password must be at least 8 characters"),
-  role: z.enum(["Patient", "Doctor"]),
+  role: z.enum(SELF_SERVE_ROLES),
 });
 
 export type SignupState = { error?: string };
@@ -80,12 +110,13 @@ export async function signup(
       .from("patients")
       .insert({ profile_id: user.id });
     if (patientError) return { error: patientError.message };
-  } else {
+  } else if (role === "Doctor") {
     const { error: doctorError } = await supabase
       .from("doctors")
       .insert({ profile_id: user.id });
     if (doctorError) return { error: doctorError.message };
   }
 
-  redirect(role === "Doctor" ? "/doctor/dashboard" : "/patient/dashboard");
+  const next: SelfServeRoleName = role;
+  redirect(ONBOARDING_PATH[next] ?? DASHBOARD_PATH[next] ?? "/");
 }

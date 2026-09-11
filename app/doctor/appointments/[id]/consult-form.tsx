@@ -4,7 +4,7 @@ import { useActionState, useState } from "react";
 import { Plus, Trash2 } from "lucide-react";
 import { completeConsult, type CompleteState } from "./actions";
 import { Button } from "@/components/ui/button";
-import { Input, Textarea } from "@/components/ui/input";
+import { Input, Select, Textarea } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 type Item = {
@@ -22,7 +22,17 @@ const emptyItem: Item = {
   instructions: "",
 };
 
-export function ConsultForm({ appointmentId }: { appointmentId: number }) {
+export function ConsultForm({
+  appointmentId,
+  hospitals,
+  labs,
+  labTests,
+}: {
+  appointmentId: number;
+  hospitals: { hospital_id: number; name: string }[];
+  labs: { lab_id: number; name: string }[];
+  labTests: { test_id: number; test_name: string }[];
+}) {
   const [state, formAction, pending] = useActionState(
     completeConsult,
     initialState
@@ -136,6 +146,48 @@ export function ConsultForm({ appointmentId }: { appointmentId: number }) {
               </div>
             </div>
           ))}
+        </div>
+      </div>
+
+      <div className="rounded-md border border-line p-3">
+        <Label>Refer to another facility (optional)</Label>
+        <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-3">
+          <Select name="referHospitalId" defaultValue="">
+            <option value="">No referral</option>
+            {hospitals.map((h) => (
+              <option key={h.hospital_id} value={h.hospital_id}>
+                {h.name}
+              </option>
+            ))}
+          </Select>
+          <Input name="referReason" placeholder="Reason" />
+          <Select name="referUrgency" defaultValue="Normal">
+            <option value="Normal">Normal</option>
+            <option value="Urgent">Urgent</option>
+            <option value="Emergency">Emergency</option>
+          </Select>
+        </div>
+      </div>
+
+      <div className="rounded-md border border-line p-3">
+        <Label>Order a lab test (optional)</Label>
+        <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
+          <Select name="labId" defaultValue="">
+            <option value="">No lab order</option>
+            {labs.map((l) => (
+              <option key={l.lab_id} value={l.lab_id}>
+                {l.name}
+              </option>
+            ))}
+          </Select>
+          <Select name="labTestId" defaultValue="">
+            <option value="">Choose a test</option>
+            {labTests.map((t) => (
+              <option key={t.test_id} value={t.test_id}>
+                {t.test_name}
+              </option>
+            ))}
+          </Select>
         </div>
       </div>
 

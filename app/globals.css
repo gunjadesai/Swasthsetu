@@ -23,4 +23,11 @@
       transition-duration: 0.01ms !important;
     }
   }
+
+  /* Hindi copy switches to the Devanagari cut of the same IBM Plex
+     Sans family, so English and Hindi text stay visually related
+     instead of one falling back to a mismatched system font. */
+  :lang(hi) {
+    font-family: var(--font-plex-sans-devanagari), var(--font-plex-sans), sans-serif;
+  }
 }

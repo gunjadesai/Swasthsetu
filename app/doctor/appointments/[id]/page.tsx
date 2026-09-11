@@ -3,6 +3,7 @@ import { format } from "date-fns";
 import { createClient } from "@/lib/supabase/server";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { TeleconsultRoom } from "@/components/teleconsult-room";
 import { ConsultForm } from "./consult-form";
 
 type PatientInfo = {
@@ -52,6 +53,12 @@ export default async function AppointmentDetailPage({
   if (!appointment || appointment.doctor_id !== doctor.doctor_id) {
     notFound();
   }
+
+  const [{ data: hospitals }, { data: labs }, { data: labTests }] = await Promise.all([
+    supabase.from("hospitals").select("hospital_id, name").order("name"),
+    supabase.from("laboratories").select("lab_id, name").order("name"),
+    supabase.from("lab_test_catalog").select("test_id, test_name").order("test_name"),
+  ]);
 
   const patient = appointment.patients as unknown as PatientInfo;
 
@@ -138,7 +145,19 @@ export default async function AppointmentDetailPage({
           )}
         </Card>
       ) : appointment.status === "Scheduled" ? (
-        <ConsultForm appointmentId={appointment.appointment_id} />
+        <>
+          {appointment.mode === "Teleconsult" && (
+            <div className="mt-6">
+              <TeleconsultRoom appointmentId={appointment.appointment_id} />
+            </div>
+          )}
+          <ConsultForm
+            appointmentId={appointment.appointment_id}
+            hospitals={hospitals ?? []}
+            labs={labs ?? []}
+            labTests={labTests ?? []}
+          />
+        </>
       ) : (
         <p className="mt-6 text-sm text-ink/60">
           This appointment was {appointment.status.toLowerCase()}.

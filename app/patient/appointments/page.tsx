@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { TeleconsultRoom } from "@/components/teleconsult-room";
 import { cn } from "@/lib/utils";
 import { CancelAppointmentButton } from "./cancel-button";
 
@@ -156,6 +157,12 @@ export default async function PatientAppointmentsPage({
                     </div>
                   </div>
                 </div>
+
+                {appt.status === "Scheduled" && appt.mode === "Teleconsult" && (
+                  <div className="mt-4 border-t border-line pt-4">
+                    <TeleconsultRoom appointmentId={appt.appointment_id} />
+                  </div>
+                )}
 
                 {record && (
                   <div className="mt-4 border-t border-line pt-4">

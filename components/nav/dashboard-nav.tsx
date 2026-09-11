@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
+import { LanguageSwitcher } from "@/components/language-switcher";
+import { useTranslation } from "@/lib/i18n/locale-context";
 import { cn } from "@/lib/utils";
 import { SignOutButton } from "./sign-out-button";
 
@@ -16,21 +18,30 @@ export function DashboardNav({
   items,
   roleLabel,
   fullName,
+  headerExtra,
 }: {
   items: NavItem[];
   roleLabel: string;
   fullName: string;
+  headerExtra?: ReactNode;
 }) {
   const pathname = usePathname();
+  const t = useTranslation();
 
   return (
-    <aside className="flex h-screen w-60 shrink-0 flex-col bg-teal-700 text-white">
-      <div className="px-5 py-6">
-        <p className="text-sm font-semibold tracking-tight">Rural Health</p>
-        <p className="text-xs text-white/60">{roleLabel} dashboard</p>
+    <aside className="sticky top-0 flex h-screen w-60 shrink-0 flex-col bg-teal-700 text-white">
+      <div className="shrink-0 flex items-start justify-between px-5 py-6">
+        <div>
+          <p className="text-sm font-semibold tracking-tight">{t("app.name")}</p>
+          <p className="text-xs text-white/60">{roleLabel}</p>
+        </div>
+        <div className="flex items-center gap-1">
+          {headerExtra}
+          <LanguageSwitcher />
+        </div>
       </div>
 
-      <nav className="flex-1 space-y-1 px-3">
+      <nav className="flex-1 space-y-1 overflow-y-auto px-3">
         {items.map((item) => {
           const active =
             pathname === item.href || pathname.startsWith(`${item.href}/`);
@@ -52,7 +63,7 @@ export function DashboardNav({
         })}
       </nav>
 
-      <div className="border-t border-white/10 px-5 py-4">
+      <div className="shrink-0 border-t border-white/10 px-5 py-4">
         <p className="truncate text-sm font-medium">{fullName}</p>
         <div className="mt-2">
           <SignOutButton />

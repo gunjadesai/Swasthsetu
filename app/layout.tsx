@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
-import { IBM_Plex_Sans } from "next/font/google";
+import { IBM_Plex_Sans, IBM_Plex_Sans_Devanagari } from "next/font/google";
+import { getLocale } from "@/lib/i18n/get-dictionary";
+import { LocaleProvider } from "@/lib/i18n/locale-context";
 import "./globals.css";
 
 // IBM Plex Sans: chosen partly because its Devanagari + other Indic
@@ -12,20 +14,36 @@ const plexSans = IBM_Plex_Sans({
   variable: "--font-plex-sans",
 });
 
+// Latin and Devanagari are separate font files even within the same
+// family, so both are loaded; globals.css switches which one applies
+// per :lang() rather than per-component.
+const plexSansDevanagari = IBM_Plex_Sans_Devanagari({
+  subsets: ["devanagari"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-plex-sans-devanagari",
+});
+
 export const metadata: Metadata = {
   title: "Rural Health Platform",
   description:
     "Accessibility and quality of public healthcare services in rural and underserved areas.",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const locale = await getLocale();
+
   return (
-    <html lang="en" className={plexSans.variable}>
-      <body className="font-sans antialiased">{children}</body>
+    <html
+      lang={locale}
+      className={`${plexSans.variable} ${plexSansDevanagari.variable}`}
+    >
+      <body className="font-sans antialiased">
+        <LocaleProvider locale={locale}>{children}</LocaleProvider>
+      </body>
     </html>
   );
 }

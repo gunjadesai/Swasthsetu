@@ -9,6 +9,16 @@ import { Label } from "@/components/ui/label";
 
 const initialState: SignupState = {};
 
+const ROLE_OPTIONS = [
+  { value: "Patient", label: "Patient" },
+  { value: "Doctor", label: "Doctor" },
+  { value: "ASHAWorker", label: "ASHA Worker" },
+  { value: "HospitalStaff", label: "Hospital Staff" },
+  { value: "LabStaff", label: "Lab Staff" },
+  { value: "PharmacyStaff", label: "Pharmacy Staff" },
+  { value: "AmbulanceProvider", label: "Ambulance Provider" },
+] as const;
+
 export default function SignupPage() {
   const [state, formAction, pending] = useActionState(signup, initialState);
 
@@ -16,7 +26,8 @@ export default function SignupPage() {
     <main className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-6 py-16">
       <h1 className="text-2xl font-semibold text-ink">Create your account</h1>
       <p className="mt-1 text-sm text-ink/60">
-        Patient or doctor - pick the one that&apos;s you.
+        Pick the role that&apos;s you - you can add village/hospital/vehicle
+        details right after.
       </p>
 
       <form action={formAction} className="mt-8 space-y-5">
@@ -54,26 +65,22 @@ export default function SignupPage() {
           <legend className="mb-1.5 text-sm font-medium text-ink">
             I am a
           </legend>
-          <div className="flex gap-4">
-            <label className="flex items-center gap-2 text-sm text-ink">
-              <input
-                type="radio"
-                name="role"
-                value="Patient"
-                defaultChecked
-                className="h-4 w-4 accent-teal-600"
-              />
-              Patient
-            </label>
-            <label className="flex items-center gap-2 text-sm text-ink">
-              <input
-                type="radio"
-                name="role"
-                value="Doctor"
-                className="h-4 w-4 accent-teal-600"
-              />
-              Doctor
-            </label>
+          <div className="grid grid-cols-2 gap-2">
+            {ROLE_OPTIONS.map(({ value, label }, i) => (
+              <label
+                key={value}
+                className="flex items-center gap-2 text-sm text-ink"
+              >
+                <input
+                  type="radio"
+                  name="role"
+                  value={value}
+                  defaultChecked={i === 0}
+                  className="h-4 w-4 accent-teal-600"
+                />
+                {label}
+              </label>
+            ))}
           </div>
         </fieldset>
 

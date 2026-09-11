@@ -4,7 +4,20 @@
 // run `supabase gen types`, that generated file becomes the source of
 // truth for the actual DB shape.
 
-export type RoleName = "Patient" | "Doctor" | "Administrator";
+export type RoleName =
+  | "Patient"
+  | "ASHAWorker"
+  | "Doctor"
+  | "HospitalStaff"
+  | "LabStaff"
+  | "PharmacyStaff"
+  | "AmbulanceProvider"
+  | "Administrator";
+
+// Roles a person can pick for themselves on the signup form.
+// Administrator is deliberately excluded - promoted manually via SQL,
+// see supabase/migrations/002_phase2_to_6.sql section 9.
+export type SelfServeRoleName = Exclude<RoleName, "Administrator">;
 
 export type Profile = {
   id: string;
@@ -88,4 +101,156 @@ export type PrescriptionItem = {
   dosage: string | null;
   duration_days: number | null;
   instructions: string | null;
+};
+
+// --- Phase 2-6 types --------------------------------------------------
+
+export type UrgencyLevel = "Low" | "Medium" | "High" | "Emergency";
+
+export type RecommendedAction =
+  | "SelfCare"
+  | "BookAppointment"
+  | "VisitPHC"
+  | "Teleconsult"
+  | "CallAmbulance";
+
+export type TriageAssessment = {
+  triage_id: number;
+  patient_id: number;
+  conducted_by_profile_id: string;
+  symptoms: Record<string, unknown>;
+  urgency_level: UrgencyLevel;
+  recommended_action: RecommendedAction;
+  notes: string | null;
+  linked_appointment_id: number | null;
+  linked_ambulance_request_id: number | null;
+  created_at: string;
+};
+
+export type QueueTicketStatus =
+  | "Waiting"
+  | "Called"
+  | "InConsult"
+  | "Done"
+  | "Skipped"
+  | "Cancelled";
+
+export type QueueTicket = {
+  ticket_id: number;
+  hospital_id: number;
+  patient_id: number;
+  doctor_id: number | null;
+  triage_id: number | null;
+  queue_date: string;
+  token_number: number;
+  priority: "Normal" | "Priority" | "Emergency";
+  status: QueueTicketStatus;
+  checked_in_at: string;
+  called_at: string | null;
+  completed_at: string | null;
+};
+
+export type AshaWorker = {
+  asha_id: number;
+  profile_id: string;
+  assigned_village_id: number;
+  asha_code: string | null;
+  supervisor_phc_id: number | null;
+};
+
+export type AshaFieldVisit = {
+  visit_id: number;
+  asha_id: number;
+  patient_id: number;
+  visit_date: string;
+  purpose: string | null;
+  notes: string | null;
+  is_synced_from_offline: boolean;
+};
+
+export type Referral = {
+  referral_id: number;
+  patient_id: number;
+  referred_from_hospital_id: number | null;
+  referred_to_hospital_id: number;
+  referred_by_doctor_id: number | null;
+  reason: string | null;
+  urgency_level: "Normal" | "Urgent" | "Emergency";
+  status: "Pending" | "Accepted" | "Completed" | "Cancelled";
+  triage_id: number | null;
+  created_at: string;
+};
+
+export type AmbulanceRequestStatus =
+  | "Requested"
+  | "Dispatched"
+  | "Completed"
+  | "Cancelled";
+
+export type AmbulanceRequest = {
+  request_id: number;
+  patient_id: number | null;
+  requested_by_profile_id: string;
+  ambulance_id: number | null;
+  pickup_latitude: number | null;
+  pickup_longitude: number | null;
+  destination_hospital_id: number | null;
+  status: AmbulanceRequestStatus;
+  triage_id: number | null;
+  requested_at: string;
+  completed_at: string | null;
+};
+
+export type HealthScheme = {
+  scheme_id: number;
+  scheme_name: string;
+  description: string | null;
+  eligibility_criteria: string | null;
+  scheme_name_hi: string | null;
+  description_hi: string | null;
+  eligibility_criteria_hi: string | null;
+  is_active: boolean;
+};
+
+export type Feedback = {
+  feedback_id: number;
+  profile_id: string;
+  hospital_id: number | null;
+  appointment_id: number | null;
+  category: "General" | "Complaint" | "ServiceQuality";
+  rating: number | null;
+  comments: string | null;
+  status: "Open" | "Reviewed" | "Resolved";
+  created_at: string;
+};
+
+export type Reminder = {
+  reminder_id: number;
+  patient_id: number;
+  reminder_type: "Vaccination" | "Medicine" | "Appointment" | "FollowUp";
+  reference_id: number | null;
+  message: string;
+  scheduled_for: string;
+  channel: "SMS" | "IVR" | "App";
+  status: "Pending" | "Sent" | "Failed";
+};
+
+export type LabTestOrder = {
+  order_id: number;
+  record_id: number;
+  patient_id: number;
+  lab_id: number;
+  test_id: number;
+  ordered_by_doctor_id: number;
+  status: "Ordered" | "SampleCollected" | "ResultReady";
+  result_summary: string | null;
+  result_file_path: string | null;
+};
+
+export type MedicineAvailability = {
+  availability_id: number;
+  pharmacy_id: number;
+  medicine_id: number;
+  stock_quantity: number;
+  last_updated: string;
 };
