@@ -24,7 +24,7 @@ export default async function SchemesPage() {
             locale === "hi" && s.eligibility_criteria_hi ? s.eligibility_criteria_hi : s.eligibility_criteria;
 
           return (
-            <div key={s.scheme_id} className="rounded-lg border border-line bg-white p-5">
+            <div key={s.scheme_id} className="rounded-lg border border-line bg-surface p-5">
               <h2 className="font-semibold text-ink">{name}</h2>
               {description && <p className="mt-1 text-sm text-ink/70">{description}</p>}
               {eligibility && (

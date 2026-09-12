@@ -2,6 +2,7 @@ import { Home, CalendarClock, Clock, User } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { DashboardNav, type NavItem } from "@/components/nav/dashboard-nav";
 import { getDictionary } from "@/lib/i18n/get-dictionary";
+import { VerificationBanner } from "@/components/verification-banner";
 
 export default async function DoctorLayout({
   children,
@@ -55,6 +56,7 @@ export default async function DoctorLayout({
         }
       />
       <main className="min-h-screen flex-1 bg-sage-50 px-8 py-8">
+        <VerificationBanner />
         {children}
       </main>
     </div>

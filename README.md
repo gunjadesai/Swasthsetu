@@ -35,6 +35,7 @@ particularly in rural and underserved areas", Govt. of Maharashtra).
    1. Paste the contents of `supabase/schema.sql` → Run (Phase 1 tables, safe to re-run - destructive, only for a project with no real data yet).
    2. Paste the contents of `supabase/migrations/002_phase2_to_6.sql` → Run (Phases 2-6: ASHA, triage/queue, referrals, ambulance, lab, pharmacy, admin/reminders/schemes/feedback, i18n seed data — additive, safe to re-run).
    3. Paste the contents of `supabase/migrations/003_ai_triage_voice_sms_phi.sql` → Run (AI triage columns, voice consult mode, SMS/USSD/IVR message log, PHI column widening + audit policies, teleconsult RLS fix — additive, safe to re-run).
+   4. Paste the contents of `supabase/migrations/004_high_priority_fixes.sql` → Run (staff verification with admin approval, protection against self-assigned roles, reliable walk-in queue tokens, no double booking — additive, safe to re-run). Existing accounts are kept as verified; new staff signups wait for approval under **Admin → Staff Verification**.
 
 4. **Disable email confirmation (prototype simplification)**
 

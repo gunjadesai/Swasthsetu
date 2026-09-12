@@ -28,7 +28,7 @@ export function RequestBoard({
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between rounded-md border border-line bg-white p-3">
+      <div className="flex items-center justify-between rounded-md border border-line bg-surface p-3">
         <span className="text-sm text-ink">
           You are currently <strong>{isAvailable ? "available" : "unavailable"}</strong>
         </span>
@@ -72,7 +72,7 @@ export function RequestBoard({
         <h2 className="text-sm font-semibold text-ink">Open requests nearby</h2>
         <div className="mt-2 space-y-2">
           {openRequests.map((r) => (
-            <div key={r.request_id} className="rounded-md border border-line bg-white p-3 text-sm">
+            <div key={r.request_id} className="rounded-md border border-line bg-surface p-3 text-sm">
               <p className="font-medium text-ink">Request #{r.request_id}</p>
               {r.pickup_latitude && r.pickup_longitude && (
                 <p className="text-ink/70">

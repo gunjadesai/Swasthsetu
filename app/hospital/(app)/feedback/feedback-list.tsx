@@ -18,7 +18,7 @@ export function FeedbackList({ items }: { items: FeedbackRow[] }) {
   return (
     <div className="space-y-2">
       {items.map((f) => (
-        <div key={f.feedback_id} className="rounded-md border border-line bg-white p-3">
+        <div key={f.feedback_id} className="rounded-md border border-line bg-surface p-3">
           <div className="flex items-center justify-between">
             <span className="font-medium text-ink">
               {f.category}

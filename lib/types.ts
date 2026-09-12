@@ -26,6 +26,10 @@ export type Profile = {
   role_id: number;
   avatar_url: string | null;
   avatar_cloudinary_public_id: string | null;
+  // Staff accounts need administrator approval (migration 004); patients
+  // are verified automatically.
+  verification_status: "Pending" | "Verified" | "Rejected";
+  verification_note: string | null;
   created_at: string;
 };
 

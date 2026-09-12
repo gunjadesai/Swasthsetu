@@ -6,6 +6,7 @@ import { login, type LoginState } from "./actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 const initialState: LoginState = {};
 
@@ -18,6 +19,7 @@ export default function LoginPage() {
 
   return (
     <main className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-6 py-16">
+      <ThemeToggle variant="light" className="fixed right-4 top-4" />
       <h1 className="text-2xl font-semibold text-ink">Sign in</h1>
       <p className="mt-1 text-sm text-ink/70">
         Welcome back.

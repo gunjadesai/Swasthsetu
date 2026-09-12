@@ -2,7 +2,7 @@
 
 import { useActionState, useState } from "react";
 import Link from "next/link";
-import { ShieldCheck, Sparkles, Volume2 } from "lucide-react";
+import { HelpCircle, Phone, RotateCcw, ShieldCheck, Sparkles, Volume2 } from "lucide-react";
 import { submitTriage, type TriageState } from "@/lib/actions/triage-actions";
 import { SYMPTOM_OPTIONS, symptomLabel } from "@/lib/triage";
 import { Button } from "@/components/ui/button";
@@ -19,7 +19,7 @@ const URGENCY_STYLES: Record<string, string> = {
   Low: "bg-success/10 text-success",
   Medium: "bg-marigold-500/15 text-marigold-600",
   High: "bg-danger/10 text-danger",
-  Emergency: "bg-danger text-white",
+  Emergency: "bg-danger-solid text-white",
 };
 
 // patientId is required for an ASHA-assisted triage (the ASHA picks
@@ -38,8 +38,58 @@ export function TriageWizard({ patientId }: { patientId?: number }) {
     setDescription((prev) => (prev ? `${prev} ${text}` : text));
   }
 
+  // useActionState keeps the last result; a full reload is the simplest
+  // way back to an empty form.
+  const checkAgain = (
+    <Button variant="secondary" onClick={() => window.location.reload()}>
+      <RotateCcw className="h-4 w-4" />
+      {t("triage.tryAgain")}
+    </Button>
+  );
+
   if (state.result) {
-    const { urgency_level, recommended_action, engine, ai, aiUnavailable } = state.result;
+    const {
+      urgency_level,
+      recommended_action,
+      engine,
+      ai,
+      aiUnavailable,
+      aiNotConfigured,
+      recognisedSymptoms,
+      notAssessed,
+    } = state.result;
+
+    // Rules-only and nothing recognised: don't pretend to know the urgency
+    // of a description nobody actually understood.
+    if (notAssessed) {
+      return (
+        <div className="max-w-xl space-y-4 rounded-lg border border-marigold-500/40 bg-surface p-6">
+          <p className="flex items-center gap-2 text-base font-semibold text-ink">
+            <HelpCircle className="h-5 w-5 text-marigold-600" />
+            {t("triage.notAssessed.title")}
+          </p>
+          <p className="text-sm text-ink/80">
+            {t(aiNotConfigured ? "triage.notAssessed.noAi" : "triage.notAssessed.aiDown")}
+          </p>
+          <p className="text-sm text-ink">{t("triage.notAssessed.next")}</p>
+          <div className="flex flex-wrap gap-3">
+            {checkAgain}
+            {!assisted && (
+              <Link href="/patient/appointments/book?mode=VoiceConsult">
+                <Button>{t("triage.bookVoice")}</Button>
+              </Link>
+            )}
+            <a href="tel:108">
+              <Button variant="danger">
+                <Phone className="h-4 w-4" />
+                {t("emergency.call108")}
+              </Button>
+            </a>
+          </div>
+        </div>
+      );
+    }
+
     const urgencyText = t(`triage.urgency.${urgency_level}` as never);
     const actionText = t(`triage.result.${recommended_action}` as never);
     const spokenSummary = [urgencyText, ai?.summary, actionText, ...(ai?.self_care_advice ?? [])]
@@ -50,12 +100,18 @@ export function TriageWizard({ patientId }: { patientId?: number }) {
         ? "triage.engine.ai"
         : engine === "AI+Rules"
           ? "triage.engine.aiEscalated"
-          : aiUnavailable
-            ? "triage.engine.rulesFallback"
-            : "triage.engine.rules";
+          : aiNotConfigured
+            ? "triage.engine.rulesNotConfigured"
+            : aiUnavailable
+              ? "triage.engine.rulesFallback"
+              : "triage.engine.rules";
+    const recognisedLabels = recognisedSymptoms
+      .map((key) => SYMPTOM_OPTIONS.find((s) => s.key === key))
+      .filter((s): s is (typeof SYMPTOM_OPTIONS)[number] => Boolean(s))
+      .map((s) => symptomLabel(s, locale));
 
     return (
-      <div className="max-w-xl space-y-5 rounded-lg border border-line bg-white p-6">
+      <div className="max-w-xl space-y-5 rounded-lg border border-line bg-surface p-6">
         <div className="flex items-center justify-between gap-3">
           <span
             className={cn(
@@ -75,6 +131,14 @@ export function TriageWizard({ patientId }: { patientId?: number }) {
           <p className="text-base font-medium text-ink">{actionText}</p>
           {ai?.summary && <p className="mt-1 text-sm text-ink/80">{ai.summary}</p>}
         </div>
+
+        {/* Without the AI, say which words drove the result so it's never a mystery. */}
+        {engine === "Rules" && recognisedLabels.length > 0 && (
+          <p className="text-sm text-ink/80">
+            <span className="font-medium text-ink">{t("triage.recognised")} </span>
+            {recognisedLabels.join(", ")}
+          </p>
+        )}
 
         {ai && ai.possible_conditions.length > 0 && (
           <section>
@@ -143,6 +207,7 @@ export function TriageWizard({ patientId }: { patientId?: number }) {
               </Link>
             </>
           )}
+          {checkAgain}
           <Link href={assisted ? "/asha/dashboard" : "/patient/dashboard"}>
             <Button variant="secondary">{t("nav.dashboard")}</Button>
           </Link>
@@ -162,7 +227,7 @@ export function TriageWizard({ patientId }: { patientId?: number }) {
           {SYMPTOM_OPTIONS.map((s) => (
             <label
               key={s.key}
-              className="flex items-start gap-2 rounded-md border border-line bg-white px-3 py-2 text-sm text-ink"
+              className="flex items-start gap-2 rounded-md border border-line bg-surface px-3 py-2 text-sm text-ink"
             >
               <input
                 type="checkbox"

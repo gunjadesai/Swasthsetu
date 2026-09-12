@@ -40,7 +40,7 @@ export default async function MedicineSearchPage({
         {results
           .filter((r) => r.medicine_catalog)
           .map((r) => (
-            <div key={r.availability_id} className="rounded-md border border-line bg-white p-3 text-sm">
+            <div key={r.availability_id} className="rounded-md border border-line bg-surface p-3 text-sm">
               <p className="font-medium text-ink">{r.medicine_catalog?.medicine_name}</p>
               <p className="text-ink/70">
                 {r.pharmacies?.name}

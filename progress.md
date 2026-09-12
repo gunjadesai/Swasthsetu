@@ -261,6 +261,25 @@ Services, Particularly in Rural and Underserved Areas."
   Supabase project with migration 003, real Anthropic key, or a Twilio
   number.**
 
+- [x] **Phase 8 — High-priority fixes + dark mode**
+  (`supabase/migrations/004_high_priority_fixes.sql`)
+  Staff verification: every non-patient signup starts Pending; the staff
+  RLS helpers (`current_doctor_id()`, `current_asha_id()`, ...) return NULL
+  until an administrator approves the account at `/admin/verifications`,
+  so unverified staff see no patient data anywhere. Profile triggers stop
+  users changing their own role/verification and block self-created
+  Administrators. Walk-in queue tokens come from `allocate_queue_token()`
+  (advisory lock per hospital/day). Booking: `booked_slots()` so
+  availability sees every patient's bookings, a server-side slot re-check,
+  a unique index on Scheduled doctor/date/time, and verified doctors only.
+  The app falls back to the old behaviour until 004 is run.
+  Site-wide dark mode: colour tokens are CSS variables (light palette
+  unchanged), `ThemeToggle` (light/dark/system, `NEXT_THEME` cookie, no
+  flash on load). Symptom checker shows which symptoms it recognised and
+  says "not assessed" instead of a false Low when the AI is unavailable.
+  **Status: type-checks and builds; migration 004 not yet run. Offline
+  sync issues from the audit deliberately left for later.**
+
 ## 7. Open Questions
 
 1. **Cloudinary cloud name** — still needed. Avatar upload *and* lab

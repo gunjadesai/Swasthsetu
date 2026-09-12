@@ -3,6 +3,7 @@ import { FlaskConical } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { DashboardNav, type NavItem } from "@/components/nav/dashboard-nav";
 import { getDictionary } from "@/lib/i18n/get-dictionary";
+import { VerificationBanner } from "@/components/verification-banner";
 
 export default async function LabLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient();
@@ -31,7 +32,10 @@ export default async function LabLayout({ children }: { children: React.ReactNod
   return (
     <div className="flex">
       <DashboardNav items={items} roleLabel="Lab Staff" fullName={profile?.full_name ?? "Lab Staff"} />
-      <main className="min-h-screen flex-1 bg-sage-50 px-8 py-8">{children}</main>
+      <main className="min-h-screen flex-1 bg-sage-50 px-8 py-8">
+        <VerificationBanner />
+        {children}
+      </main>
     </div>
   );
 }

@@ -45,7 +45,7 @@ export default async function AshaVisitsPage() {
           <h2 className="text-sm font-semibold text-ink">Recent visits</h2>
           <div className="mt-3 space-y-2">
             {(visits ?? []).map((v) => (
-              <div key={v.visit_id} className="rounded-md border border-line bg-white p-3 text-sm">
+              <div key={v.visit_id} className="rounded-md border border-line bg-surface p-3 text-sm">
                 <div className="flex items-center justify-between">
                   <span className="font-medium text-ink">
                     {(v.patients as unknown as { profiles?: { full_name?: string } } | null)?.profiles

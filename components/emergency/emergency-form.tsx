@@ -123,7 +123,7 @@ export function EmergencyForm({
         {call108}
       </div>
 
-      <section className="rounded-lg border border-danger/30 bg-white p-4">
+      <section className="rounded-lg border border-danger/30 bg-surface p-4">
         <h2 className="text-sm font-semibold text-ink">{t("emergency.voiceTitle")}</h2>
         <p className="mt-1 text-xs text-ink/70">{t("emergency.voiceHelp")}</p>
         <MicButton

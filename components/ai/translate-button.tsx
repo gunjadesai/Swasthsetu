@@ -38,7 +38,7 @@ export function TranslateButton({ text, to, mode = "general" }: TranslateButtonP
           type="button"
           onClick={handleTranslate}
           disabled={loading}
-          className="rounded bg-teal-600 px-3 py-1 text-sm text-white hover:bg-teal-700"
+          className="rounded bg-primary px-3 py-1 text-sm text-white hover:bg-primary-hover"
         >
           {loading ? "Translating…" : "Translate"}
         </button>

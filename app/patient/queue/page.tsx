@@ -38,7 +38,7 @@ export default async function PatientQueuePage() {
       <h1 className="text-2xl font-semibold text-ink">{t("queue.title")}</h1>
 
       {activeTicket ? (
-        <div className="mt-6 rounded-lg border border-line bg-white p-6">
+        <div className="mt-6 rounded-lg border border-line bg-surface p-6">
           <p className="text-sm text-ink/70">
             {(activeTicket.hospitals as unknown as { name?: string } | null)?.name}
           </p>

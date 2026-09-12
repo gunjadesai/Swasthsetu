@@ -20,7 +20,7 @@ export function StockRow({
   const [isPending, startTransition] = useTransition();
 
   return (
-    <div className="flex items-center justify-between rounded-md border border-line bg-white p-3 text-sm">
+    <div className="flex items-center justify-between rounded-md border border-line bg-surface p-3 text-sm">
       <span className="text-ink">{medicineName}</span>
       <div className="flex items-center gap-2">
         <Input

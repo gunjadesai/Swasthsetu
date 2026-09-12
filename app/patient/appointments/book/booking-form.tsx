@@ -93,7 +93,7 @@ export function BookingForm({
                 "flex cursor-pointer flex-col gap-1 rounded-md border p-3 text-sm transition-colors",
                 mode === option
                   ? "border-teal-600 bg-teal-50"
-                  : "border-line bg-white hover:border-teal-500"
+                  : "border-line bg-surface hover:border-teal-500"
               )}
             >
               <span className="flex items-center gap-2 font-medium text-ink">
@@ -172,8 +172,8 @@ export function BookingForm({
                   className={cn(
                     "rounded-md border px-3 py-1.5 text-sm transition-colors",
                     time === slot
-                      ? "border-teal-600 bg-teal-600 text-white"
-                      : "border-line bg-white text-ink hover:border-teal-500"
+                      ? "border-teal-600 bg-primary text-white"
+                      : "border-line bg-surface text-ink hover:border-teal-500"
                   )}
                 >
                   {slot}

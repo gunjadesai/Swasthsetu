@@ -51,7 +51,7 @@ export default async function PatientProfilePage() {
       />
 
       {patient?.patient_id && (
-        <div className="mt-8 rounded-md border border-line bg-white p-4">
+        <div className="mt-8 rounded-md border border-line bg-surface p-4">
           <p className="text-sm font-medium text-ink">Health ID</p>
           <p className="text-sm text-ink/70">{patient.health_id_number ?? "Not yet assigned"}</p>
           <a

@@ -3,6 +3,7 @@ import { Home, UserPlus, ClipboardList, MapPin, Stethoscope, Siren } from "lucid
 import { createClient } from "@/lib/supabase/server";
 import { DashboardNav, type NavItem } from "@/components/nav/dashboard-nav";
 import { getDictionary } from "@/lib/i18n/get-dictionary";
+import { VerificationBanner } from "@/components/verification-banner";
 
 export default async function AshaLayout({
   children,
@@ -41,7 +42,10 @@ export default async function AshaLayout({
   return (
     <div className="flex">
       <DashboardNav items={items} roleLabel="ASHA Worker" fullName={profile?.full_name ?? "ASHA Worker"} />
-      <main className="min-h-screen flex-1 bg-sage-50 px-8 py-8">{children}</main>
+      <main className="min-h-screen flex-1 bg-sage-50 px-8 py-8">
+        <VerificationBanner />
+        {children}
+      </main>
     </div>
   );
 }

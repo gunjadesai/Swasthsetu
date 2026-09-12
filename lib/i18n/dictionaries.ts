@@ -18,6 +18,10 @@ export const dictionaries = {
   en: {
     "app.name": "Swasthsetu",
     "lang.switch": "Language",
+    "theme.label": "Theme",
+    "theme.light": "Light",
+    "theme.dark": "Dark",
+    "theme.system": "Use device setting",
     "lang.en": "English",
     "lang.hi": "Hindi",
     "lang.gu": "Gujarati",
@@ -175,6 +179,18 @@ export const dictionaries = {
 
     "nav.healthIndex": "Public Health Index",
 
+    "nav.verifications": "Staff Verification",
+
+    "verification.pending.title": "Your account is awaiting verification",
+
+    "verification.pending.body": "An administrator needs to confirm your details before you can see patient information. You can finish setting up your profile in the meantime.",
+
+    "verification.rejected.title": "Your account was not verified",
+
+    "verification.rejected.body": "You can't access patient information. Contact your district administrator if you think this is a mistake.",
+
+    "verification.note": "Reason:",
+
     "voice.speak": "Speak",
     "voice.stop": "Stop listening",
     "voice.listening": "Listening...",
@@ -208,6 +224,13 @@ export const dictionaries = {
     "triage.bookInPerson": "Book in-person visit",
     "triage.bookVideo": "Book video consult",
     "triage.bookVoice": "Book voice consult",
+    "triage.recognised": "Understood from what you wrote:",
+    "triage.engine.rulesNotConfigured": "The AI symptom checker isn't set up yet, so only the listed symptom words were recognised.",
+    "triage.notAssessed.title": "We couldn't assess what you wrote",
+    "triage.notAssessed.noAi": "The AI symptom checker isn't set up yet, and none of the listed symptoms were found in your description.",
+    "triage.notAssessed.aiDown": "The AI symptom checker is unavailable right now, and none of the listed symptoms were found in your description.",
+    "triage.notAssessed.next": "Tick the symptoms that match, or book a voice consult so a doctor can listen to you. If it feels serious, call 108 now.",
+    "triage.tryAgain": "Check again",
 
     "emergency.flagged": "Your symptom check shows this may be an emergency. Request an ambulance now.",
     "emergency.whileWaiting": "While you wait",
@@ -227,6 +250,10 @@ export const dictionaries = {
   hi: {
     "app.name": "स्वास्थ्य सेतु",
     "lang.switch": "भाषा",
+    "theme.label": "थीम",
+    "theme.light": "लाइट",
+    "theme.dark": "डार्क",
+    "theme.system": "डिवाइस सेटिंग अपनाएं",
     "lang.en": "अंग्रेज़ी",
     "lang.hi": "हिंदी",
     "lang.gu": "गुजराती",
@@ -384,6 +411,18 @@ export const dictionaries = {
 
     "nav.healthIndex": "जन स्वास्थ्य सूचकांक",
 
+    "nav.verifications": "स्टाफ सत्यापन",
+
+    "verification.pending.title": "आपका खाता सत्यापन की प्रतीक्षा में है",
+
+    "verification.pending.body": "मरीज़ों की जानकारी देखने से पहले एक एडमिनिस्ट्रेटर को आपकी जानकारी की पुष्टि करनी होगी। तब तक आप अपनी प्रोफ़ाइल पूरी कर सकते हैं।",
+
+    "verification.rejected.title": "आपका खाता सत्यापित नहीं हुआ",
+
+    "verification.rejected.body": "आप मरीज़ों की जानकारी नहीं देख सकते। अगर यह गलती लगती है तो अपने ज़िला एडमिनिस्ट्रेटर से संपर्क करें।",
+
+    "verification.note": "कारण:",
+
     "voice.speak": "बोलें",
     "voice.stop": "सुनना बंद करें",
     "voice.listening": "सुन रहे हैं...",
@@ -417,6 +456,13 @@ export const dictionaries = {
     "triage.bookInPerson": "क्लिनिक विज़िट बुक करें",
     "triage.bookVideo": "वीडियो सलाह बुक करें",
     "triage.bookVoice": "वॉइस सलाह बुक करें",
+    "triage.recognised": "आपके लिखे से समझा गया:",
+    "triage.engine.rulesNotConfigured": "एआई लक्षण जांच अभी चालू नहीं है, इसलिए केवल सूची वाले लक्षण शब्द पहचाने गए।",
+    "triage.notAssessed.title": "आपने जो लिखा उसका आकलन नहीं हो सका",
+    "triage.notAssessed.noAi": "एआई लक्षण जांच अभी चालू नहीं है, और आपके विवरण में सूची का कोई लक्षण नहीं मिला।",
+    "triage.notAssessed.aiDown": "एआई लक्षण जांच अभी उपलब्ध नहीं है, और आपके विवरण में सूची का कोई लक्षण नहीं मिला।",
+    "triage.notAssessed.next": "मिलते-जुलते लक्षणों पर टिक करें, या वॉइस सलाह बुक करें ताकि डॉक्टर आपकी बात सुन सकें। गंभीर लगे तो अभी 108 पर कॉल करें।",
+    "triage.tryAgain": "फिर से जांचें",
 
     "emergency.flagged": "आपकी लक्षण जांच के अनुसार यह आपातकाल हो सकता है। अभी एम्बुलेंस के लिए अनुरोध करें।",
     "emergency.whileWaiting": "इंतज़ार करते समय",
@@ -436,6 +482,10 @@ export const dictionaries = {
   gu: {
     "app.name": "સ્વાસ્થ્ય સેતુ",
     "lang.switch": "ભાષા",
+    "theme.label": "થીમ",
+    "theme.light": "લાઇટ",
+    "theme.dark": "ડાર્ક",
+    "theme.system": "ડિવાઇસ સેટિંગ અનુસરો",
     "lang.en": "અંગ્રેજી",
     "lang.hi": "હિન્દી",
     "lang.gu": "ગુજરાતી",
@@ -593,6 +643,18 @@ export const dictionaries = {
 
     "nav.healthIndex": "જાહેર આરોગ્ય સૂચકાંક",
 
+    "nav.verifications": "સ્ટાફ ચકાસણી",
+
+    "verification.pending.title": "તમારું ખાતું ચકાસણીની રાહ જોઈ રહ્યું છે",
+
+    "verification.pending.body": "દર્દીઓની માહિતી જોઈ શકો તે પહેલાં એડમિનિસ્ટ્રેટરે તમારી વિગતોની પુષ્ટિ કરવી જરૂરી છે. ત્યાં સુધી તમે તમારી પ્રોફાઇલ પૂર્ણ કરી શકો છો.",
+
+    "verification.rejected.title": "તમારું ખાતું ચકાસાયું નથી",
+
+    "verification.rejected.body": "તમે દર્દીઓની માહિતી જોઈ શકતા નથી. જો આ ભૂલ લાગે તો તમારા જિલ્લા એડમિનિસ્ટ્રેટરનો સંપર્ક કરો.",
+
+    "verification.note": "કારણ:",
+
     "voice.speak": "બોલો",
     "voice.stop": "સાંભળવાનું બંધ કરો",
     "voice.listening": "સાંભળી રહ્યા છીએ...",
@@ -626,6 +688,13 @@ export const dictionaries = {
     "triage.bookInPerson": "ક્લિનિક મુલાકાત બુક કરો",
     "triage.bookVideo": "વિડિયો પરામર્શ બુક કરો",
     "triage.bookVoice": "વૉઇસ પરામર્શ બુક કરો",
+    "triage.recognised": "તમે લખેલામાંથી સમજાયું:",
+    "triage.engine.rulesNotConfigured": "એઆઈ લક્ષણ તપાસ હજી ચાલુ નથી, તેથી ફક્ત યાદીમાંના લક્ષણ શબ્દો ઓળખાયા.",
+    "triage.notAssessed.title": "તમે જે લખ્યું તેનું મૂલ્યાંકન થઈ શક્યું નહીં",
+    "triage.notAssessed.noAi": "એઆઈ લક્ષણ તપાસ હજી ચાલુ નથી, અને તમારા વર્ણનમાં યાદીનું કોઈ લક્ષણ મળ્યું નહીં.",
+    "triage.notAssessed.aiDown": "એઆઈ લક્ષણ તપાસ હાલ ઉપલબ્ધ નથી, અને તમારા વર્ણનમાં યાદીનું કોઈ લક્ષણ મળ્યું નહીં.",
+    "triage.notAssessed.next": "મળતા લક્ષણો પર ટિક કરો, અથવા વૉઇસ પરામર્શ બુક કરો જેથી ડોક્ટર તમારી વાત સાંભળી શકે. ગંભીર લાગે તો હમણાં 108 પર કૉલ કરો.",
+    "triage.tryAgain": "ફરી તપાસો",
 
     "emergency.flagged": "તમારી લક્ષણ તપાસ મુજબ આ કટોકટી હોઈ શકે છે. હમણાં એમ્બ્યુલન્સ માટે વિનંતી કરો.",
     "emergency.whileWaiting": "રાહ જોતી વખતે",
@@ -645,6 +714,10 @@ export const dictionaries = {
   mr: {
     "app.name": "स्वास्थ्य सेतु",
     "lang.switch": "भाषा",
+    "theme.label": "थीम",
+    "theme.light": "लाइट",
+    "theme.dark": "डार्क",
+    "theme.system": "डिव्हाइस सेटिंग वापरा",
     "lang.en": "इंग्रजी",
     "lang.hi": "हिंदी",
     "lang.gu": "गुजराती",
@@ -779,6 +852,18 @@ export const dictionaries = {
 
     "nav.healthIndex": "सार्वजनिक आरोग्य निर्देशांक",
 
+    "nav.verifications": "कर्मचारी पडताळणी",
+
+    "verification.pending.title": "तुमचे खाते पडताळणीच्या प्रतीक्षेत आहे",
+
+    "verification.pending.body": "रुग्णांची माहिती पाहण्यापूर्वी प्रशासकाने तुमच्या तपशिलांची पुष्टी करणे आवश्यक आहे. तोपर्यंत तुम्ही तुमची प्रोफाइल पूर्ण करू शकता.",
+
+    "verification.rejected.title": "तुमचे खाते पडताळले गेले नाही",
+
+    "verification.rejected.body": "तुम्ही रुग्णांची माहिती पाहू शकत नाही. ही चूक वाटत असल्यास तुमच्या जिल्हा प्रशासकाशी संपर्क साधा.",
+
+    "verification.note": "कारण:",
+
     "voice.speak": "बोला",
     "voice.stop": "ऐकणे थांबवा",
     "voice.listening": "ऐकत आहे...",
@@ -812,6 +897,13 @@ export const dictionaries = {
     "triage.bookInPerson": "दवाखाना भेट बुक करा",
     "triage.bookVideo": "व्हिडिओ सल्ला बुक करा",
     "triage.bookVoice": "व्हॉइस सल्ला बुक करा",
+    "triage.recognised": "तुम्ही लिहिलेल्यातून समजले:",
+    "triage.engine.rulesNotConfigured": "एआय लक्षण तपासणी अद्याप सुरू नाही, म्हणून फक्त यादीतील लक्षण शब्द ओळखले गेले.",
+    "triage.notAssessed.title": "तुम्ही जे लिहिले त्याचे मूल्यांकन होऊ शकले नाही",
+    "triage.notAssessed.noAi": "एआय लक्षण तपासणी अद्याप सुरू नाही, आणि तुमच्या वर्णनात यादीतील कोणतेही लक्षण सापडले नाही.",
+    "triage.notAssessed.aiDown": "एआय लक्षण तपासणी सध्या उपलब्ध नाही, आणि तुमच्या वर्णनात यादीतील कोणतेही लक्षण सापडले नाही.",
+    "triage.notAssessed.next": "जुळणाऱ्या लक्षणांवर टिक करा, किंवा व्हॉइस सल्ला बुक करा म्हणजे डॉक्टर तुमचे ऐकू शकतील. गंभीर वाटल्यास आत्ताच 108 वर कॉल करा.",
+    "triage.tryAgain": "पुन्हा तपासा",
 
     "emergency.flagged": "तुमच्या लक्षण तपासणीनुसार ही आणीबाणी असू शकते. आत्ताच रुग्णवाहिकेसाठी विनंती करा.",
     "emergency.whileWaiting": "वाट पाहत असताना",

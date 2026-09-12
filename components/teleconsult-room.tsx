@@ -154,7 +154,7 @@ export function TeleconsultRoom({
 
   if (!roomName) {
     return (
-      <div className="rounded-lg border border-line bg-white p-4">
+      <div className="rounded-lg border border-line bg-surface p-4">
         <Button onClick={handleJoin} disabled={loading} className="gap-2">
           {voice ? <Phone className="h-4 w-4" /> : <Video className="h-4 w-4" />}
           {loading ? "Starting..." : voice ? "Join voice consult" : "Join video consult"}

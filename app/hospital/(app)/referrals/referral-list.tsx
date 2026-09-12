@@ -17,7 +17,7 @@ type Referral = {
 const URGENCY_STYLES: Record<string, string> = {
   Emergency: "border-danger bg-danger/5",
   Urgent: "border-marigold-500 bg-marigold-400/10",
-  Normal: "border-line bg-white",
+  Normal: "border-line bg-surface",
 };
 
 export function ReferralList({ referrals }: { referrals: Referral[] }) {

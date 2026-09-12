@@ -17,6 +17,13 @@ export type TriageState = {
     engine: TriageEngine;
     ai: AiTriageAssessment | null;
     aiUnavailable: boolean;
+    // The AI call failed because no credentials are configured (vs. a
+    // temporary outage) - the UI says "not set up" instead of "try later".
+    aiNotConfigured: boolean;
+    // Symptom keys the rules recognised in the free text (not ticked).
+    recognisedSymptoms: string[];
+    // Rules-only and nothing recognised at all: urgency is unknown, not Low.
+    notAssessed: boolean;
   };
 };
 
@@ -147,6 +154,11 @@ export async function submitTriage(
       engine: outcome.engine,
       ai: outcome.ai,
       aiUnavailable: Boolean(outcome.aiError),
+      // Missing or invalid key (the SDK's "Could not resolve authentication
+      // method", or a 401) rather than a transient outage.
+      aiNotConfigured: /authentication method|api[\s_-]?key|authToken|\b401\b/i.test(outcome.aiError ?? ""),
+      recognisedSymptoms: outcome.symptomKeys.filter((key) => !symptomKeys.includes(key)),
+      notAssessed: outcome.engine === "Rules" && outcome.symptomKeys.length === 0,
     },
   };
 }

@@ -57,6 +57,20 @@ export async function registerAssistedPatient(
     return { error: "Your ASHA profile isn't set up yet - finish onboarding first." };
   }
 
+  // Registration runs with the service-role key below, which RLS can't
+  // gate - so the verification check has to happen here (migration 004).
+  const { data: me, error: meError } = await supabase
+    .from("profiles")
+    .select("verification_status")
+    .eq("id", user.id)
+    .single();
+  if (!meError && me && me.verification_status !== "Verified") {
+    return {
+      error:
+        "Your ASHA account is waiting for administrator verification - you can register patients once it's approved.",
+    };
+  }
+
   const { data: roleRow } = await supabase
     .from("roles")
     .select("role_id")

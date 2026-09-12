@@ -1,6 +1,14 @@
 import { createClient } from "@/lib/supabase/server";
 import { isConsultMode } from "@/lib/consult-mode";
+import { isMissingSchemaError } from "@/lib/supabase/schema-fallback";
 import { BookingForm } from "./booking-form";
+
+type DoctorRow = {
+  doctor_id: number;
+  specialization: string | null;
+  supports_teleconsult: boolean;
+  profiles: { full_name: string } | null;
+};
 
 export default async function BookAppointmentPage({
   searchParams,
@@ -11,17 +19,23 @@ export default async function BookAppointmentPage({
 }) {
   const { mode } = await searchParams;
   const supabase = await createClient();
-  const { data: doctors } = await supabase
-    .from("doctors")
-    .select("doctor_id, specialization, supports_teleconsult, profiles(full_name)");
 
-  const doctorOptions = (doctors ?? []).map((d) => ({
+  // Only administrator-verified doctors can be booked (migration 004).
+  // Before that migration there's no verification column - list everyone.
+  const verified = await supabase
+    .from("doctors")
+    .select("doctor_id, specialization, supports_teleconsult, profiles!inner(full_name, verification_status)")
+    .eq("profiles.verification_status", "Verified");
+  const doctors =
+    verified.error && isMissingSchemaError(verified.error)
+      ? (await supabase.from("doctors").select("doctor_id, specialization, supports_teleconsult, profiles(full_name)")).data
+      : verified.data;
+
+  const doctorOptions = ((doctors ?? []) as unknown as DoctorRow[]).map((d) => ({
     doctor_id: d.doctor_id,
     specialization: d.specialization,
     supports_teleconsult: d.supports_teleconsult,
-    full_name:
-      (d.profiles as unknown as { full_name: string } | null)?.full_name ??
-      "Doctor",
+    full_name: d.profiles?.full_name ?? "Doctor",
   }));
 
   return (

@@ -16,7 +16,7 @@ const GRADE_STYLE: Record<HealthGrade, string> = {
   Good: "bg-success/10 text-success",
   Fair: "bg-marigold-500/15 text-marigold-600",
   "Needs attention": "bg-danger/10 text-danger",
-  Critical: "bg-danger text-white",
+  Critical: "bg-danger-solid text-white",
   "Insufficient data": "bg-sage-200 text-ink/70",
 };
 
@@ -79,7 +79,7 @@ function DistrictCard({ district, headline = false }: { district: DistrictIndex;
                 className="mt-1 h-2 overflow-hidden rounded-full bg-sage-200"
               >
                 {ind.score !== null && (
-                  <div className="h-full rounded-full bg-teal-600" style={{ width: `${ind.score}%` }} />
+                  <div className="h-full rounded-full bg-primary" style={{ width: `${ind.score}%` }} />
                 )}
               </div>
               <p className="mt-0.5 text-xs text-ink/70">

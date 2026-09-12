@@ -16,7 +16,7 @@ type Ticket = {
 const PRIORITY_STYLES: Record<string, string> = {
   Emergency: "border-danger bg-danger/5",
   Priority: "border-marigold-500 bg-marigold-400/10",
-  Normal: "border-line bg-white",
+  Normal: "border-line bg-surface",
 };
 
 export function QueueBoard({ tickets }: { tickets: Ticket[] }) {

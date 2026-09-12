@@ -27,3 +27,14 @@ export async function withMigrationFallback<T extends ResultWithError>(
   );
   return attempt(false);
 }
+
+// Broader check for code that depends on migration 004's database
+// functions and columns: missing function (PGRST202 / 42883), missing
+// column (PGRST204 / 42703) or missing table (PGRST205).
+export function isMissingSchemaError(error: { code?: string; message?: string } | null | undefined): boolean {
+  if (!error) return false;
+  return (
+    ["PGRST202", "PGRST204", "PGRST205", "42703", "42883"].includes(error.code ?? "") ||
+    /Could not find the (function|'.+' column|table)/.test(error.message ?? "")
+  );
+}
