@@ -26,7 +26,7 @@ particularly in rural and underserved areas", Govt. of Maharashtra).
    - `CLOUDINARY_CLOUD_NAME` / `CLOUDINARY_API_KEY` / `CLOUDINARY_API_SECRET` — from your Cloudinary dashboard. The key/secret are server-only; never put them in a `NEXT_PUBLIC_*` variable.
    - `SUPABASE_SERVICE_ROLE_KEY` — **required** (not optional): ASHA-assisted patient registration, reminder dispatch, the SMS/USSD/IVR webhooks and the Public Health Index use it server-side. Supabase dashboard → Settings → API → `service_role` key.
    - `PHI_ENCRYPTION_KEY` — **required**: encrypts patient health information before it is stored. Generate one with `node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"` and keep a backup — encrypted records are unreadable without it.
-   - `ANTHROPIC_API_KEY` — enables the AI symptom checker (web, voice, SMS, phone line). Without it triage falls back to the rule-based engine.
+   - `GEMINI_API_KEY` — enables the AI symptom checker (web, voice, SMS, phone line) via Google Gemini; get a free key at aistudio.google.com/apikey. Without it triage falls back to the rule-based engine.
    - `SMS_PROVIDER=twilio` + `TWILIO_*`, `PUBLIC_APP_URL`, `TELECOM_WEBHOOK_SECRET`, `CRON_SECRET` — keypad-phone channels and reminder delivery. See `.env.local.example` for what each does; without them SMS/voice calls are simulated and logged.
 
 3. **Run the database schema**
@@ -84,12 +84,20 @@ particularly in rural and underserved areas", Govt. of Maharashtra).
   CRUD, feedback resolution.
 - **Cloudinary**: signed server-side uploads (secret never reaches the browser).
 - **Supabase**: Auth-integrated schema, RLS policies on every table.
-- **AI symptom triage**: Claude assesses checked symptoms plus the
+- **AI symptom triage**: Google Gemini assesses checked symptoms plus the
   patient's own words (typed, spoken, SMS or phone call) into Low /
   Medium / High / Emergency with likely minor causes, home-care advice and
-  red flags — in English, Hindi or Gujarati. A rule-based check can only
-  raise urgency, and takes over when the AI is unavailable. Emergency
-  results go straight to the emergency page.
+  red flags — in English, Hindi, Gujarati or Marathi. A rule-based check
+  can only raise urgency, and takes over when the AI is unavailable (the
+  result then shows which symptoms it recognised, or says it couldn't
+  assess the description). Emergency results go straight to the
+  emergency page.
+- **Staff verification**: new doctor, ASHA, hospital, lab, pharmacy and
+  ambulance accounts see no patient data until an administrator approves
+  them under **Admin → Staff Verification**; users can't change their own
+  role.
+- **Dark mode**: Light / Dark / follow-device switch on every page,
+  remembered per device, with no flash of the wrong theme on load.
 - **Voice**: speak symptoms, hear results read aloud, and a hands-free
   voice SOS that requests an ambulance on hearing "help" / "bachao".
 - **Keypad phones & rural areas**: SMS commands (`SOS`, `CHECK <symptoms>`,

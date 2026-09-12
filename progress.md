@@ -264,7 +264,7 @@ Services, Particularly in Rural and Underserved Areas."
   AES-256-GCM PHI encryption + PHI access audit log. District Public
   Health Index (admin page + suppressed public JSON feed).
   **Status: code complete and type-checks; not yet run against a live
-  Supabase project with migration 003, real Anthropic key, or a Twilio
+  Supabase project with migration 003, real Gemini key, or a Twilio
   number.**
 
 - [x] **Phase 8 — High-priority fixes + dark mode**
