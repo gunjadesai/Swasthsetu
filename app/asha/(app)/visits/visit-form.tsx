@@ -1,13 +1,9 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import { useState, useTransition } from "react";
 import { logFieldVisit, syncFieldVisits } from "./actions";
-import {
-  getPendingVisits,
-  queueVisit,
-  clearSyncedVisits,
-  type PendingFieldVisit,
-} from "@/lib/offline-queue";
+import { FIELD_VISIT_STORAGE_KEY, type FieldVisitEntry } from "./offline";
+import { useOfflineSync } from "@/lib/offline-sync/use-offline-sync";
 import { Button } from "@/components/ui/button";
 import { Input, Select, Textarea } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -17,33 +13,21 @@ export function VisitForm({
 }: {
   patients: { patient_id: number; full_name: string }[];
 }) {
-  const [pending, setPending] = useState<PendingFieldVisit[]>([]);
+  const {
+    pending,
+    enqueue: queueVisit,
+    flush: flushQueue,
+    isSyncing,
+    syncError,
+    lastSyncedCount,
+  } = useOfflineSync<FieldVisitEntry>(FIELD_VISIT_STORAGE_KEY, syncFieldVisits);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
-  useEffect(() => {
-    setPending(getPendingVisits());
-    const handleOnline = () => flushQueue();
-    window.addEventListener("online", handleOnline);
-    return () => window.removeEventListener("online", handleOnline);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  function flushQueue() {
-    const current = getPendingVisits();
-    if (current.length === 0) return;
-    startTransition(async () => {
-      const result = await syncFieldVisits(current);
-      if (result.error) {
-        setError(result.error);
-        return;
-      }
-      clearSyncedVisits(result.syncedLocalIds);
-      setPending(getPendingVisits());
-      setMessage(`Synced ${result.syncedLocalIds.length} queued visit(s).`);
-    });
-  }
+  const combinedError = error ?? syncError;
+  const combinedMessage =
+    message ?? (lastSyncedCount ? `Synced ${lastSyncedCount} queued visit(s).` : null);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -63,7 +47,6 @@ export function VisitForm({
 
     if (!navigator.onLine) {
       queueVisit({ patientId, visitDate, purpose, notes });
-      setPending(getPendingVisits());
       setMessage("You're offline - the visit was saved on this device and will sync automatically.");
       form.reset();
       return;
@@ -82,7 +65,6 @@ export function VisitForm({
         // Network dropped mid-request even though navigator.onLine
         // said we were online - fall back to the same offline queue.
         queueVisit({ patientId, visitDate, purpose, notes });
-        setPending(getPendingVisits());
         setMessage("Couldn't reach the server - the visit was saved on this device and will sync automatically.");
         form.reset();
       }
@@ -94,8 +76,8 @@ export function VisitForm({
       {pending.length > 0 && (
         <div className="flex items-center justify-between rounded-md border border-marigold-500/40 bg-marigold-400/10 px-3 py-2 text-sm">
           <span>{pending.length} visit(s) waiting to sync</span>
-          <Button type="button" size="sm" variant="secondary" onClick={flushQueue} disabled={isPending}>
-            Sync now
+          <Button type="button" size="sm" variant="secondary" onClick={flushQueue} disabled={isPending || isSyncing}>
+            {isSyncing ? "Syncing..." : "Sync now"}
           </Button>
         </div>
       )}
@@ -127,13 +109,13 @@ export function VisitForm({
           <Textarea id="notes" name="notes" rows={3} />
         </div>
 
-        {error && (
+        {combinedError && (
           <p role="alert" className="rounded-md bg-danger/10 px-3 py-2 text-sm text-danger">
-            {error}
+            {combinedError}
           </p>
         )}
-        {message && (
-          <p className="rounded-md bg-success/10 px-3 py-2 text-sm text-success">{message}</p>
+        {combinedMessage && (
+          <p className="rounded-md bg-success/10 px-3 py-2 text-sm text-success">{combinedMessage}</p>
         )}
 
         <Button type="submit" disabled={isPending} className="w-full">

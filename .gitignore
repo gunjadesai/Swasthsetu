@@ -5,6 +5,7 @@ node_modules
 .DS_Store
 npm-debug.log*
 next-env.d.ts
+tsconfig.tsbuildinfo
 
 # large downloaded/generated data - scripts regenerate these locally
 scripts/_lgd_download/

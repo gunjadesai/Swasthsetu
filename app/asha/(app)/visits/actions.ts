@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-import type { PendingFieldVisit } from "@/lib/offline-queue";
+import type { PendingFieldVisit } from "./offline";
 
 async function resolveAshaId(supabase: Awaited<ReturnType<typeof createClient>>) {
   const {

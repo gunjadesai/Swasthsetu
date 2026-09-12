@@ -80,10 +80,16 @@ Services, Particularly in Rural and Underserved Areas."
   Not a certified ABDM/ABHA integration (needs an org registration this
   project doesn't have) - an honest architecture answer, not an
   overclaim.
-- **Offline tolerance**: ASHA field-visit logging queues in
-  `localStorage` (`lib/offline-queue.ts`) when offline, synced via a
+- **Offline tolerance**: a generic, reusable offline-sync layer
+  (`lib/offline-sync/`: a localStorage-backed queue factory + a
+  `useOfflineSync` hook) queues entries when offline, synced via a
   "Sync now" button or automatically on the `online` event. No new
   dependency (not IndexedDB) - the records are small text, no blobs.
+  ASHA field-visit logging (`app/asha/(app)/visits/`) is the first
+  consumer; any future offline-capable flow (digital triage
+  submissions, queue-ticket check-ins) plugs into the same hook
+  instead of re-implementing the localStorage/online-listener
+  plumbing.
 - **SMS/IVR reminders**: `reminders.channel = 'App'` is fully delivered
   (notification bell); `'SMS'`/`'IVR'` rows are marked `Failed` with a
   reason by `/api/reminders/dispatch` until a telecom provider
