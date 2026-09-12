@@ -9,7 +9,7 @@
 // bilingual behaviour actually matters. Add keys here as you localize
 // more pages; anything missing falls back to English via t().
 
-export const locales = ["en", "hi", "gu"] as const;
+export const locales = ["en", "hi", "gu", "mr"] as const;
 export type Locale = (typeof locales)[number];
 export const defaultLocale: Locale = "en";
 export const LOCALE_COOKIE = "NEXT_LOCALE";
@@ -21,6 +21,7 @@ export const dictionaries = {
     "lang.en": "English",
     "lang.hi": "Hindi",
     "lang.gu": "Gujarati",
+    "lang.mr": "Marathi",
 
     "nav.dashboard": "Dashboard",
     "nav.appointments": "Appointments",
@@ -85,6 +86,7 @@ export const dictionaries = {
     "lang.en": "अंग्रेज़ी",
     "lang.hi": "हिंदी",
     "lang.gu": "गुजराती",
+    "lang.mr": "मराठी",
 
     "nav.dashboard": "डैशबोर्ड",
     "nav.appointments": "अपॉइंटमेंट",
@@ -149,6 +151,7 @@ export const dictionaries = {
     "lang.en": "અંગ્રેજી",
     "lang.hi": "હિન્દી",
     "lang.gu": "ગુજરાતી",
+    "lang.mr": "મરાઠી",
 
     "nav.dashboard": "ડેશબોર્ડ",
     "nav.appointments": "એપોઇન્ટમેન્ટ",
@@ -207,6 +210,71 @@ export const dictionaries = {
     "common.submit": "સબમિટ કરો",
     "common.loading": "લોડ થઈ રહ્યું છે...",
   },
+  mr: {
+    "app.name": "स्वास्थ्य सेतु",
+    "lang.switch": "भाषा",
+    "lang.en": "इंग्रजी",
+    "lang.hi": "हिंदी",
+    "lang.gu": "गुजराती",
+    "lang.mr": "मराठी",
+
+    "nav.dashboard": "डॅशबोर्ड",
+    "nav.appointments": "भेटी",
+    "nav.book": "भेट बुक करा",
+    "nav.profile": "प्रोफाइल",
+    "nav.availability": "उपलब्धता",
+    "nav.triage": "लक्षण तपासणी",
+    "nav.queue": "रांग स्थिती",
+    "nav.emergency": "आपत्कालीन",
+    "nav.schemes": "आरोग्य योजना",
+    "nav.feedback": "अभिप्राय",
+    "nav.medicineSearch": "औषध शोधा",
+    "nav.registerPatient": "रुग्ण नोंदणी करा",
+    "nav.visits": "फील्ड भेटी",
+    "nav.directory": "गाव/रुग्णालय निर्देशिका",
+    "nav.referrals": "रेफरल",
+    "nav.labOrders": "प्रयोगशाळा ऑर्डर",
+    "nav.pharmacyStock": "औषध साठा",
+    "nav.ambulanceRequests": "रुग्णवाहिका विनंत्या",
+    "nav.reports": "अहवाल",
+
+    "landing.title": "प्रत्येक गावासाठी आरोग्य सेवा",
+    "landing.subtitle":
+      "डॉक्टरांची भेट बुक करा, तपासणी करा, रुग्णवाहिकेची विनंती करा आणि तुमचे आरोग्य रेकॉर्ड ट्रॅक करा - तुमच्या भाषेत.",
+    "landing.signup": "खाते तयार करा",
+    "landing.login": "साइन इन करा",
+
+    "auth.login.title": "साइन इन करा",
+    "auth.signup.title": "तुमचे खाते तयार करा",
+    "auth.role.label": "मी आहे...",
+
+    "triage.title": "लक्षण तपासणी",
+    "triage.subtitle":
+      "पुढे काय करायचे हे जाणून घेण्यासाठी काही प्रश्नांची उत्तरे द्या. हे डॉक्टरांच्या सल्ल्याचा पर्याय नाही.",
+    "triage.submit": "लक्षणे तपासा",
+    "triage.result.SelfCare": "सध्या घरी स्व-काळजी पुरेशी असावी.",
+    "triage.result.BookAppointment": "कृपया डॉक्टरांसोबत नियमित भेट बुक करा.",
+    "triage.result.VisitPHC": "कृपया लवकरच तुमच्या जवळच्या पीएचसी/रुग्णालयाला भेट द्या.",
+    "triage.result.Teleconsult": "आता डॉक्टरांसोबत व्हिडिओ सल्लामसलत सुरू करा.",
+    "triage.result.CallAmbulance": "हे तातडीचे दिसते - आता रुग्णवाहिकेची विनंती करा.",
+
+    "emergency.title": "आपत्कालीन",
+    "emergency.callAmbulance": "रुग्णवाहिकेची विनंती करा",
+    "emergency.subtitle": "आम्ही तुमचे स्थान जवळच्या उपलब्ध रुग्णवाहिकेसह शेअर करू.",
+
+    "schemes.title": "सरकारी आरोग्य योजना",
+    "schemes.eligibility": "पात्रता",
+
+    "queue.title": "रांग स्थिती",
+    "queue.yourToken": "तुमचा टोकन नंबर",
+    "queue.waiting": "प्रतीक्षा करत आहे",
+    "queue.called": "तुम्हाला बोलावले जात आहे - कृपया काउंटरवर जा",
+
+    "common.save": "जतन करा",
+    "common.cancel": "रद्द करा",
+    "common.submit": "सबमिट करा",
+    "common.loading": "लोड करत आहे...",
+  }
 } as const satisfies Record<Locale, Record<string, string>>;
 
 export type DictionaryKey = keyof typeof dictionaries.en;
