@@ -17,6 +17,18 @@ export default function LoginPage() {
   // password still clears after a failed attempt, as it should.
   const [email, setEmail] = useState("");
 
+  // Signing in inherently needs the network (Supabase auth has to be
+  // reached) - it can't be made to "work offline" like the ASHA
+  // field-visit queue. But without this check, submitting while
+  // offline let the Server Action's own fetch fail as an *uncaught*
+  // client-side exception ("Failed to fetch", with no error.tsx
+  // boundary to catch it) instead of a message the user can act on.
+  // Checking navigator.onLine before the form's action ever fires
+  // avoids attempting - and crashing on - a request we already know
+  // will fail.
+  const [offlineError, setOfflineError] = useState<string | null>(null);
+  const errorToShow = offlineError ?? state.error;
+
   return (
     <main className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-6 py-16">
       <ThemeToggle variant="light" className="fixed right-4 top-4" />
@@ -25,7 +37,17 @@ export default function LoginPage() {
         Welcome back.
       </p>
 
-      <form action={formAction} className="mt-8 space-y-5">
+      <form
+        action={formAction}
+        onSubmit={(e) => {
+          setOfflineError(null);
+          if (!navigator.onLine) {
+            e.preventDefault();
+            setOfflineError("You're offline. Connect to the internet and try again.");
+          }
+        }}
+        className="mt-8 space-y-5"
+      >
         <div>
           <Label htmlFor="email">Email</Label>
           <Input
@@ -51,12 +73,12 @@ export default function LoginPage() {
           />
         </div>
 
-        {state.error && (
+        {errorToShow && (
           <p
             role="alert"
             className="rounded-md bg-danger/10 px-3 py-2 text-sm text-danger"
           >
-            {state.error}
+            {errorToShow}
           </p>
         )}
 

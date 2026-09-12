@@ -73,15 +73,21 @@ Services, Particularly in Rural and Underserved Areas."
 - **Digital triage** is AI-first with a rule-based safety floor
   (migration 003). `lib/ai-triage.ts` sends the checked symptoms plus the
   person's own words (typed, spoken, SMS or phone-call transcript) to
-  Claude (`claude-opus-5`, structured output via `betaZodOutputFormat`,
-  server-side refusal `fallbacks: "default"`) and gets back urgency, next
-  action, likely minor causes, safe home-care advice and red flags in the
-  patient's language. The weighted checklist in `lib/triage.ts` (now with
-  en/hi/gu/Hinglish keywords) always runs too: final urgency is the higher
-  of the two, so rules can escalate the AI but never downgrade it. No API
-  key, a timeout or a refusal -> rules alone (`engine = 'Rules'`). Web
-  gets `effort: high`; SMS/IVR get `effort: low` with a 9s timeout
-  (Twilio drops webhooks at 15s); USSD is rules-only.
+  Gemini (`gemini-flash-lite-latest`, structured output via
+  `responseSchema` + Zod validation) and gets back urgency, next action,
+  likely minor causes, safe home-care advice and red flags in the
+  patient's language. Originally built against Claude
+  (`claude-opus-5`) - switched to Gemini for a free/cheap-tier option;
+  the heavier `gemini-flash-latest` alias returned a consistent 503
+  "high demand" on this project's free-tier key when tested directly,
+  the lite tier didn't, so lite is what's actually used, not a
+  convenience downgrade. The weighted checklist in `lib/triage.ts` (now
+  with en/hi/gu/Hinglish keywords) always runs too: final urgency is the
+  higher of the two, so rules can escalate the AI but never downgrade
+  it. No API key, a timeout, or an invalid response -> rules alone
+  (`engine = 'Rules'`). Web/Voice get a 45s timeout with 2 retries on a
+  transient 503; SMS/IVR get a 9s timeout with no retries (Twilio drops
+  webhooks at 15s); USSD is rules-only.
 - **Emergency redirect**: an Emergency triage result never renders a
   result card - the server action `redirect()`s to `/patient/emergency`
   (or the new `/asha/emergency`) with the triage attached, which shows why
@@ -180,12 +186,12 @@ Services, Particularly in Rural and Underserved Areas."
 |----------------------------------------|----------------------------------|
 | `NEXT_PUBLIC_SUPABASE_URL`             | ✅ have it                       |
 | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | ✅ have it                       |
-| `SUPABASE_SERVICE_ROLE_KEY`            | ❌ **now required** - ASHA registration + reminder dispatch |
-| `CLOUDINARY_CLOUD_NAME`                | ❌ still needed - blocks image upload until provided |
+| `SUPABASE_SERVICE_ROLE_KEY`            | ✅ have it - ASHA registration + reminder dispatch |
+| `CLOUDINARY_CLOUD_NAME`                | ✅ have it |
 | `CLOUDINARY_API_KEY`                   | ✅ have it (server-only)         |
 | `CLOUDINARY_API_SECRET`                | ✅ have it (server-only)         |
-| `PHI_ENCRYPTION_KEY`                   | ❌ **required** (migration 003) - clinical writes fail with a clear error until set |
-| `ANTHROPIC_API_KEY`                    | ❌ needed for AI triage - rule-based fallback until set |
+| `PHI_ENCRYPTION_KEY`                   | ✅ have it (migration 003) - clinical writes fail with a clear error until set |
+| `GEMINI_API_KEY`                       | ✅ have it - AI triage (`gemini-flash-lite-latest`); rule-based fallback until set |
 | `SMS_PROVIDER` + `TWILIO_*`            | ❌ optional - SMS/voice calls are simulated until set |
 | `TELECOM_WEBHOOK_SECRET` / `PUBLIC_APP_URL` | ❌ needed before exposing `/api/sms`, `/api/ussd`, `/api/ivr` |
 | `CRON_SECRET`                          | ❌ recommended - protects `/api/reminders/dispatch` |

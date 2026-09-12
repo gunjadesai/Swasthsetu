@@ -32,6 +32,13 @@ export default function SignupPage() {
   const update = (key: keyof typeof fields) => (e: ChangeEvent<HTMLInputElement>) =>
     setFields((prev) => ({ ...prev, [key]: e.target.value }));
 
+  // Same reasoning as app/login/page.tsx: account creation needs the
+  // network, and without this guard submitting while offline let the
+  // Server Action's fetch fail as an uncaught client-side exception
+  // instead of a message the user can act on.
+  const [offlineError, setOfflineError] = useState<string | null>(null);
+  const errorToShow = offlineError ?? state.error;
+
   return (
     <main className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-6 py-16">
       <ThemeToggle variant="light" className="fixed right-4 top-4" />
@@ -41,7 +48,17 @@ export default function SignupPage() {
         details right after.
       </p>
 
-      <form action={formAction} className="mt-8 space-y-5">
+      <form
+        action={formAction}
+        onSubmit={(e) => {
+          setOfflineError(null);
+          if (!navigator.onLine) {
+            e.preventDefault();
+            setOfflineError("You're offline. Connect to the internet and try again.");
+          }
+        }}
+        className="mt-8 space-y-5"
+      >
         <div>
           <Label htmlFor="fullName">Full name</Label>
           <Input
@@ -118,12 +135,12 @@ export default function SignupPage() {
           </div>
         </fieldset>
 
-        {state.error && (
+        {errorToShow && (
           <p
             role="alert"
             className="rounded-md bg-danger/10 px-3 py-2 text-sm text-danger"
           >
-            {state.error}
+            {errorToShow}
           </p>
         )}
 
