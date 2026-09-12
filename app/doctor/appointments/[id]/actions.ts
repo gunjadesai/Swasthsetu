@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
+import { encryptPHI } from "@/lib/phi-crypto";
 
 const itemSchema = z.object({
   medicineName: z.string().min(1),
@@ -82,15 +83,25 @@ export async function completeConsult(
     return { error: "Appointment not found." };
   }
 
+  // Diagnosis, symptoms and notes are PHI - encrypted before storage.
+  let clinical: { diagnosis: string | null; symptoms: string | null; notes: string | null };
+  try {
+    clinical = {
+      diagnosis: encryptPHI(parsed.data.diagnosis),
+      symptoms: encryptPHI(parsed.data.symptoms),
+      notes: encryptPHI(parsed.data.notes),
+    };
+  } catch (e) {
+    return { error: e instanceof Error ? e.message : "Could not secure the consultation record." };
+  }
+
   const { data: record, error: recordError } = await supabase
     .from("medical_records")
     .insert({
       patient_id: appointment.patient_id,
       appointment_id: appointment.appointment_id,
       doctor_id: doctor.doctor_id,
-      diagnosis: parsed.data.diagnosis ?? null,
-      symptoms: parsed.data.symptoms ?? null,
-      notes: parsed.data.notes ?? null,
+      ...clinical,
     })
     .select("record_id")
     .single();

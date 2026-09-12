@@ -7,8 +7,12 @@ import { createClient } from "@/lib/supabase/server";
 // no vendor signup, no API key. The room name is derived from the
 // appointment id plus a random suffix so it can't be guessed/joined by
 // someone who isn't on this platform. One row per appointment in
-// teleconsult_sessions carries the link and the join/leave timestamps.
-export async function getOrCreateTeleconsultRoom(appointmentId: number): Promise<{
+// teleconsult_sessions carries the link, whether it's a video or a
+// voice-only consult, and the join/leave timestamps.
+export async function getOrCreateTeleconsultRoom(
+  appointmentId: number,
+  callType: "Video" | "Voice" = "Video"
+): Promise<{
   meetingLink: string;
   error?: string;
 }> {
@@ -29,6 +33,7 @@ export async function getOrCreateTeleconsultRoom(appointmentId: number): Promise
   const { error } = await supabase.from("teleconsult_sessions").insert({
     appointment_id: appointmentId,
     meeting_link: meetingLink,
+    call_type: callType,
   });
 
   if (error) return { meetingLink: "", error: error.message };

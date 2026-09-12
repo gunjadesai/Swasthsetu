@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { AvatarUploader } from "@/components/avatar-uploader";
+import { decryptPHI } from "@/lib/phi-crypto";
 import { ProfileForm } from "./profile-form";
 
 export default async function PatientProfilePage() {
@@ -44,8 +45,8 @@ export default async function PatientProfilePage() {
           dateOfBirth: patient?.date_of_birth ?? "",
           gender: patient?.gender ?? "",
           bloodGroup: patient?.blood_group ?? "",
-          address: patient?.address ?? "",
-          emergencyContact: patient?.emergency_contact ?? "",
+          address: decryptPHI(patient?.address) ?? "",
+          emergencyContact: decryptPHI(patient?.emergency_contact) ?? "",
         }}
       />
 

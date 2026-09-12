@@ -3,6 +3,7 @@ import { format } from "date-fns";
 import { createClient } from "@/lib/supabase/server";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { consultModeLabel } from "@/lib/consult-mode";
 
 export default async function DoctorAppointmentsPage() {
   const supabase = await createClient();
@@ -53,7 +54,7 @@ export default async function DoctorAppointmentsPage() {
                       {patient?.profiles?.full_name ?? "Patient"}
                     </p>
                     <p className="text-sm text-ink/60">
-                      {appt.mode === "Teleconsult" ? "Video consult" : "In person"}
+                      {consultModeLabel(appt.mode)}
                     </p>
                   </div>
                   <div className="text-right">
