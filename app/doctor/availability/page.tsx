@@ -2,16 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { Card } from "@/components/ui/card";
 import { AvailabilityForm } from "./availability-form";
 import { DeleteAvailabilityButton } from "./delete-button";
-
-const days = [
-  "Sunday",
-  "Monday",
-  "Tuesday",
-  "Wednesday",
-  "Thursday",
-  "Friday",
-  "Saturday",
-];
+import { getDictionary } from "@/lib/i18n/get-dictionary";
 
 export default async function DoctorAvailabilityPage() {
   const supabase = await createClient();
@@ -44,12 +35,23 @@ export default async function DoctorAvailabilityPage() {
     byDay.set(a.day_of_week, list);
   });
 
+  const t = await getDictionary();
+
+  const daysLocalized = [
+    t("day.sunday"),
+    t("day.monday"),
+    t("day.tuesday"),
+    t("day.wednesday"),
+    t("day.thursday"),
+    t("day.friday"),
+    t("day.saturday"),
+  ];
+
   return (
     <div className="max-w-3xl">
-      <h1 className="text-2xl font-semibold text-ink">Availability</h1>
+      <h1 className="text-2xl font-semibold text-ink">{t("doctor.availability.title")}</h1>
       <p className="mt-1 text-sm text-ink/60">
-        Set the weekly hours patients can book you for - this repeats every
-        week.
+        {t("doctor.availability.subtitle")}
       </p>
 
       <Card className="mt-6">
@@ -57,7 +59,7 @@ export default async function DoctorAvailabilityPage() {
       </Card>
 
       <div className="mt-6 space-y-4">
-        {days.map((label, i) => {
+        {daysLocalized.map((label, i) => {
           const blocks = byDay.get(i) ?? [];
           if (blocks.length === 0) return null;
           return (
@@ -82,7 +84,7 @@ export default async function DoctorAvailabilityPage() {
         })}
         {(availability ?? []).length === 0 && (
           <p className="text-sm text-ink/60">
-            No availability set yet - add your first block above.
+            {t("doctor.availability.empty")}
           </p>
         )}
       </div>

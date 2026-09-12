@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { AvatarUploader } from "@/components/avatar-uploader";
 import { ProfileForm } from "./profile-form";
+import { getDictionary } from "@/lib/i18n/get-dictionary";
 
 export default async function DoctorProfilePage() {
   const supabase = await createClient();
@@ -20,12 +21,13 @@ export default async function DoctorProfilePage() {
       .eq("profile_id", user!.id)
       .single(),
   ]);
+  const t = await getDictionary();
 
   return (
     <div className="max-w-lg">
-      <h1 className="text-2xl font-semibold text-ink">My profile</h1>
+      <h1 className="text-2xl font-semibold text-ink">{t("doctor.profile.title")}</h1>
       <p className="mt-1 text-sm text-ink/60">
-        Patients see this when they book with you.
+        {t("doctor.profile.subtitle")}
       </p>
 
       <div className="mt-6">
