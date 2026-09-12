@@ -79,8 +79,8 @@ CANDIDATE_KEYS = {
     "state": ["stname", "STATE_NAME", "State_Name", "state_name", "st_name", "State", "STATE"],
     "district": ["dtname", "DISTRICT_NAME", "District_Name", "district_name", "dt_name", "District", "DISTRICT"],
     "subdistrict": ["sdtname", "SUBDIST_NAME", "SubDistrict_Name", "subdistrict_name", "Subdistrict", "SUB_DIST"],
-    "village_name": ["vlname", "VILLAGE_NAME", "Village_Name", "village_name", "vill_name", "Village", "VILLAGE"],
-    "village_code": ["vlcode11", "LGD_VILLAGE_CODE", "village_code", "VILLAGE_CODE", "vl_code", "vlcode"],
+    "village_name": ["vilname11", "vilnam_soi", "vlname", "VILLAGE_NAME", "Village_Name", "village_name", "vill_name", "Village", "VILLAGE"],
+    "village_code": ["vilcode11", "LGD_VILLAGE_CODE", "village_code", "VILLAGE_CODE", "vl_code", "vlcode"],
 }
 
 # Known official-name differences between this source and
