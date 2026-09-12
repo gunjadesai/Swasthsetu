@@ -12,6 +12,7 @@ import { MicButton } from "@/components/voice/mic-button";
 import { useLocale, useTranslation } from "@/lib/i18n/locale-context";
 import { speak } from "@/lib/voice/use-speech";
 import { cn } from "@/lib/utils";
+import { useOfflineFormGuard } from "@/lib/offline-sync/use-offline-guard";
 
 const initialState: TriageState = {};
 
@@ -27,6 +28,7 @@ const URGENCY_STYLES: Record<string, string> = {
 // action resolves the signed-in patient itself.
 export function TriageWizard({ patientId }: { patientId?: number }) {
   const [state, formAction, pending] = useActionState(submitTriage, initialState);
+  const { offlineError, guardSubmit } = useOfflineFormGuard("offline.formBlockedEmergency");
   const t = useTranslation();
   const locale = useLocale();
   const [description, setDescription] = useState("");
@@ -217,7 +219,7 @@ export function TriageWizard({ patientId }: { patientId?: number }) {
   }
 
   return (
-    <form action={formAction} className="max-w-xl space-y-5">
+    <form action={formAction} onSubmit={guardSubmit} className="max-w-xl space-y-5">
       {patientId && <input type="hidden" name="patientId" value={patientId} />}
       <input type="hidden" name="channel" value={usedVoice ? "Voice" : "Web"} />
 
@@ -254,9 +256,9 @@ export function TriageWizard({ patientId }: { patientId?: number }) {
         <MicButton onTranscript={appendTranscript} label={t("voice.describe")} />
       </div>
 
-      {state.error && (
+      {(offlineError ?? state.error) && (
         <p role="alert" className="rounded-md bg-danger/10 px-3 py-2 text-sm text-danger">
-          {state.error}
+          {offlineError ?? state.error}
         </p>
       )}
 

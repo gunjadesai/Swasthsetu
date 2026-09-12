@@ -9,6 +9,7 @@ import { consultModeLabel, isConsultMode, isRemoteConsult } from "@/lib/consult-
 import { isMissingSchemaError } from "@/lib/supabase/schema-fallback";
 import { telecomTexts } from "@/lib/telecom/messages";
 import { sendSms } from "@/lib/telecom/sms";
+import { getProfilePhone } from "@/lib/phone-access";
 
 type SupabaseClient = Awaited<ReturnType<typeof createClient>>;
 
@@ -199,19 +200,15 @@ export async function bookAppointment(
 
   // SMS confirmation, so the booking reaches patients who only carry a
   // keypad phone. Sent after the redirect; never blocks the booking.
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("phone_number")
-    .eq("id", user!.id)
-    .single();
-  if (profile?.phone_number) {
+  const phoneNumber = await getProfilePhone(supabase, user!.id);
+  if (phoneNumber) {
     const locale = await getLocale();
     const text = telecomTexts(locale).bookingConfirmed(
       doctor.profiles?.full_name ?? "",
       format(new Date(`${date}T${time}`), "d MMM, HH:mm"),
       consultModeLabel(mode)
     );
-    const phone = profile.phone_number;
+    const phone = phoneNumber;
     after(async () => {
       await sendSms(phone, text, {
         profileId: user!.id,

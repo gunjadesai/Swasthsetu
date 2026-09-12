@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { decryptPHI } from "@/lib/phi-crypto";
 import { logPhiAccess } from "@/lib/audit";
+import { getProfilePhone } from "@/lib/phone-access";
 
 // Read-only, RLS-respecting FHIR R4-shaped export. This is NOT a
 // certified ABDM/ABHA integration (that needs an org registration this
@@ -31,7 +32,7 @@ export async function GET(
 
   const { data: patient } = await supabase
     .from("patients")
-    .select("patient_id, date_of_birth, gender, health_id_number, profiles(full_name, phone_number)")
+    .select("patient_id, date_of_birth, gender, health_id_number, profiles(id, full_name)")
     .eq("patient_id", patientId)
     .maybeSingle();
 
@@ -60,7 +61,10 @@ export async function GET(
       .eq("patient_id", patientId),
   ]);
 
-  const profile = patient.profiles as unknown as { full_name?: string; phone_number?: string } | null;
+  const profile = patient.profiles as unknown as { id: string; full_name?: string } | null;
+  // Only exported for someone the database says may have the number
+  // (the patient themselves, their doctor, their ASHA) - see migration 005.
+  const phone = await getProfilePhone(supabase, profile?.id);
 
   const bundle = {
     resourceType: "Bundle",
@@ -74,7 +78,7 @@ export async function GET(
             ? [{ system: "https://healthid.ndhm.gov.in", value: patient.health_id_number }]
             : [],
           name: profile?.full_name ? [{ text: profile.full_name }] : [],
-          telecom: profile?.phone_number ? [{ system: "phone", value: profile.phone_number }] : [],
+          telecom: phone ? [{ system: "phone", value: phone }] : [],
           gender: patient.gender ?? undefined,
           birthDate: patient.date_of_birth ?? undefined,
         },

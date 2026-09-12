@@ -5,6 +5,7 @@ import { submitFeedback, type FeedbackState } from "./actions";
 import { Button } from "@/components/ui/button";
 import { Select, Textarea } from "@/components/ui/input";
 import { useTranslation } from "@/lib/i18n/locale-context";
+import { useOfflineFormGuard } from "@/lib/offline-sync/use-offline-guard";
 
 const initialState: FeedbackState = {};
 
@@ -14,10 +15,11 @@ export function FeedbackForm({
   hospitals: { hospital_id: number; name: string }[];
 }) {
   const [state, formAction, pending] = useActionState(submitFeedback, initialState);
+  const { offlineError, guardSubmit } = useOfflineFormGuard();
   const t = useTranslation();
 
   return (
-    <form action={formAction} className="max-w-md space-y-4">
+    <form action={formAction} onSubmit={guardSubmit} className="max-w-md space-y-4">
       <Select name="hospitalId" defaultValue="">
         <option value="">General feedback (not about a specific facility)</option>
         {hospitals.map((h) => (
@@ -44,9 +46,9 @@ export function FeedbackForm({
 
       <Textarea name="comments" rows={4} placeholder="Tell us more..." />
 
-      {state.error && (
+      {(offlineError ?? state.error) && (
         <p role="alert" className="rounded-md bg-danger/10 px-3 py-2 text-sm text-danger">
-          {state.error}
+          {offlineError ?? state.error}
         </p>
       )}
       {state.success && (

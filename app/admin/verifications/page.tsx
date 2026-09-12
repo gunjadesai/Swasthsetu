@@ -3,6 +3,7 @@ import { format } from "date-fns";
 import { createClient } from "@/lib/supabase/server";
 import { Card } from "@/components/ui/card";
 import { isMissingSchemaError } from "@/lib/supabase/schema-fallback";
+import { getProfilePhones } from "@/lib/phone-access";
 import { cn } from "@/lib/utils";
 import { VerificationList, type StaffRow } from "./verification-list";
 
@@ -24,7 +25,6 @@ type Named = { name?: string } | null;
 type ProfileRow = {
   id: string;
   full_name: string;
-  phone_number: string | null;
   created_at: string;
   verification_status: Tab;
   verification_note: string | null;
@@ -80,16 +80,21 @@ export default async function AdminVerificationsPage({
   const { data, error } = await supabase
     .from("profiles")
     .select(
-      "id, full_name, phone_number, created_at, verification_status, verification_note, verified_at, roles!inner(role_name), doctors(registration_number, specialization, hospitals(name)), hospital_staff(designation, hospitals(name)), lab_staff(laboratories(name)), pharmacy_staff(pharmacies(name)), ambulances(vehicle_number), asha_workers(asha_code, villages(village_name))"
+      "id, full_name, created_at, verification_status, verification_note, verified_at, roles!inner(role_name), doctors(registration_number, specialization, hospitals(name)), hospital_staff(designation, hospitals(name)), lab_staff(laboratories(name)), pharmacy_staff(pharmacies(name)), ambulances(vehicle_number), asha_workers(asha_code, villages(village_name))"
     )
     .eq("verification_status", tab)
     .not("roles.role_name", "in", "(Patient,Administrator)")
     .order("created_at", { ascending: tab === "Pending" });
 
-  const rows: StaffRow[] = ((data ?? []) as unknown as ProfileRow[]).map((row) => ({
+  const profileRows = (data ?? []) as unknown as ProfileRow[];
+  // Phone numbers are no longer selectable off profiles (migration 005);
+  // profile_phone() hands them to an administrator, and to nobody else.
+  const phones = await getProfilePhones(supabase, profileRows.map((row) => row.id));
+
+  const rows: StaffRow[] = profileRows.map((row) => ({
     id: row.id,
     fullName: row.full_name,
-    phone: row.phone_number,
+    phone: phones[row.id] ?? null,
     role: ROLE_LABEL[row.roles?.role_name ?? ""] ?? row.roles?.role_name ?? "Staff",
     facility: facilityOf(row),
     signedUp: format(new Date(row.created_at), "d MMM yyyy"),

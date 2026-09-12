@@ -29,6 +29,11 @@ export function EmergencyForm({
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [locationError, setLocationError] = useState<string | null>(null);
   const [heard, setHeard] = useState<string[]>([]);
+  // A Server Action submitted with no signal rejects inside the
+  // transition as an uncaught exception, which blanks the screen - on
+  // the one page where that must never happen. Checked before sending,
+  // and the message points straight at 108.
+  const [offlineError, setOfflineError] = useState<string | null>(null);
   const submittedRef = useRef(false);
 
   useEffect(() => {
@@ -53,6 +58,12 @@ export function EmergencyForm({
 
   function send(channel: "Web" | "Voice", callerNotes = "") {
     if (submittedRef.current) return;
+    if (typeof navigator !== "undefined" && !navigator.onLine) {
+      setOfflineError(t("offline.formBlockedEmergency"));
+      speak(t("offline.formBlockedEmergency"), locale);
+      return;
+    }
+    setOfflineError(null);
     submittedRef.current = true;
     const formData = new FormData();
     if (coords) {
@@ -104,9 +115,9 @@ export function EmergencyForm({
           </p>
         )}
 
-        {state.error && (
+        {(offlineError ?? state.error) && (
           <p role="alert" className="rounded-md bg-danger/10 px-3 py-2 text-sm text-danger">
-            {state.error}
+            {offlineError ?? state.error}
           </p>
         )}
 

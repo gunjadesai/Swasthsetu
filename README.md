@@ -27,7 +27,8 @@ particularly in rural and underserved areas", Govt. of Maharashtra).
    - `SUPABASE_SERVICE_ROLE_KEY` — **required** (not optional): ASHA-assisted patient registration, reminder dispatch, the SMS/USSD/IVR webhooks and the Public Health Index use it server-side. Supabase dashboard → Settings → API → `service_role` key.
    - `PHI_ENCRYPTION_KEY` — **required**: encrypts patient health information before it is stored. Generate one with `node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"` and keep a backup — encrypted records are unreadable without it.
    - `GEMINI_API_KEY` — enables the AI symptom checker (web, voice, SMS, phone line) via Google Gemini; get a free key at aistudio.google.com/apikey. Without it triage falls back to the rule-based engine.
-   - `SMS_PROVIDER=twilio` + `TWILIO_*`, `PUBLIC_APP_URL`, `TELECOM_WEBHOOK_SECRET`, `CRON_SECRET` — keypad-phone channels and reminder delivery. See `.env.local.example` for what each does; without them SMS/voice calls are simulated and logged.
+   - `SMS_PROVIDER=twilio` + `TWILIO_*`, `PUBLIC_APP_URL`, `TELECOM_WEBHOOK_SECRET` — keypad-phone channels. See `.env.local.example` for what each does; without them SMS/voice calls are simulated and logged.
+   - `CRON_SECRET` — **required** to run reminder dispatch. `POST /api/reminders/dispatch` uses the service-role key, so with no secret set it answers `503` instead of running open; the caller sends `Authorization: Bearer <secret>` (or `x-cron-secret`).
 
 3. **Run the database schema**
 
@@ -36,6 +37,18 @@ particularly in rural and underserved areas", Govt. of Maharashtra).
    2. Paste the contents of `supabase/migrations/002_phase2_to_6.sql` → Run (Phases 2-6: ASHA, triage/queue, referrals, ambulance, lab, pharmacy, admin/reminders/schemes/feedback, i18n seed data — additive, safe to re-run).
    3. Paste the contents of `supabase/migrations/003_ai_triage_voice_sms_phi.sql` → Run (AI triage columns, voice consult mode, SMS/USSD/IVR message log, PHI column widening + audit policies, teleconsult RLS fix — additive, safe to re-run).
    4. Paste the contents of `supabase/migrations/004_high_priority_fixes.sql` → Run (staff verification with admin approval, protection against self-assigned roles, reliable walk-in queue tokens, no double booking — additive, safe to re-run). Existing accounts are kept as verified; new staff signups wait for approval under **Admin → Staff Verification**.
+   5. Paste the contents of `supabase/migrations/005_open_issue_fixes.sql` → Run (ambulance drivers can see and atomically claim unassigned requests, consultations save in one transaction, offline field visits sync idempotently, phone numbers stop being readable by every signed-in user — additive, safe to re-run). It refuses to run until 004 has been applied.
+
+   Run them in order. Until 005 is in, the app degrades loudly rather than
+   silently: ambulance drivers see an empty request board, saving a
+   consultation returns a message naming the migration, an offline sync can
+   duplicate a visit, and every signed-in user can still read every phone
+   number (a warning is logged on the server each time one is read).
+
+   **Note for future migrations:** 005 replaces the blanket `SELECT` grant on
+   `profiles` with a per-column one that leaves out `phone_number`. A new
+   column on `profiles` is not selectable by clients until that grant is
+   refreshed — re-run 005 (it rebuilds the list from `information_schema`).
 
 4. **Disable email confirmation (prototype simplification)**
 
@@ -79,7 +92,10 @@ particularly in rural and underserved areas", Govt. of Maharashtra).
   review.
 - **Lab Staff**: order queue, result upload via Cloudinary.
 - **Pharmacy Staff**: stock management.
-- **Ambulance Provider**: request board, accept/dispatch/complete.
+- **Ambulance Provider**: request board showing unassigned requests in the
+  driver's district, accept/dispatch/complete. Accepting is a single
+  atomic database claim, so two drivers tapping "Accept" at the same
+  moment can't both be dispatched to one patient.
 - **Administrator**: district-level aggregate dashboard, health-scheme
   CRUD, feedback resolution.
 - **Cloudinary**: signed server-side uploads (secret never reaches the browser).
@@ -108,10 +124,62 @@ particularly in rural and underserved areas", Govt. of Maharashtra).
   voice consult (for weak networks; doctor can also phone the patient).
 - **PHI security**: AES-256-GCM encryption of clinical data, contact
   details and messages at rest, plus a PHI access audit log.
+- **Offline (ASHA field visits)**: visits logged with no signal are queued
+  on the device — per signed-in worker (a shared phone never mixes two
+  ASHAs' queues), with notes encrypted under a non-extractable device key,
+  and each entry carrying a reference so a retried sync can't log the same
+  visit twice. The queue flushes when the browser comes back online and
+  when the page is reopened with a signal; a failed entry no longer blocks
+  the ones behind it, and a device with no room left says so instead of
+  claiming the visit was saved. A small service worker (`public/sw.js`)
+  keeps the app shell loadable and shows `/offline` — which repeats "call
+  108" in all four languages — instead of a browser error page. It caches
+  build assets only, never a signed-in page or an API response.
 - **Public Health Index**: district scores for emergency response,
   appointments, referrals, vaccination, medicines and satisfaction —
   admin view and a de-identified public JSON feed
   (`/api/public-health-index`).
+
+## Real SMS in India (DLT)
+
+Indian carriers reject application-to-person SMS that isn't registered
+under TRAI's DLT (Distributed Ledger Technology) regime, so the SMS
+channel stays simulated-or-Twilio-test until this is done. It is a
+registration task, not a code task:
+
+1. Register the entity (the health department or college running the
+   deployment) on any operator's DLT portal (Jio, Airtel, VI, BSNL) —
+   one registration covers all operators. You get a **Principal Entity
+   ID**.
+2. Register a **sender ID / header** (6 alphanumeric characters, e.g.
+   `SWSTHU`) against that entity.
+3. Register a **content template** for every message the app sends,
+   with variable parts as `{#var#}`. The texts are all in
+   `lib/telecom/messages.ts` — booking confirmation, reminder, triage
+   result, emergency acknowledgement — in English, Hindi, Gujarati and
+   Marathi. Each language variant is a separate template.
+4. Put the approved template IDs into the gateway account, and keep the
+   message text byte-identical to the approved template — a mismatch is
+   rejected at the carrier, not by the gateway.
+5. Point the app at a DLT-aware gateway (MSG91, Gupshup, Exotel), which
+   slots in as another branch beside `sendViaTwilio()` in
+   `lib/telecom/sms.ts`.
+
+Until then, leave `SMS_PROVIDER` unset: messages are logged and recorded
+as `Simulated`, never marked `Sent`.
+
+## Known gaps
+
+- **Marathi symptom labels need a native speaker's review.** The Marathi
+  strings in `lib/i18n/dictionaries.ts` and the Marathi keyword lists in
+  `lib/triage.ts` were written without one. Triage rules can only raise
+  urgency, so a missed keyword degrades to a lower-confidence result
+  rather than a wrong "you're fine" — but they should still be checked
+  before any real use.
+- **Translation** (`/api/ai/translate`) uses the same Gemini key as
+  triage. With no key set it returns the original text and
+  `translated: false` — the caller shows the untranslated string rather
+  than anything that looks like a translation.
 
 See `progress.md` for the full architecture decisions, phase roadmap,
 and what's intentionally still out of scope. See `DOCUMENTATION.md` for the

@@ -84,7 +84,9 @@ export default async function HomePage() {
       <section className="bg-hero">
         <div className="mx-auto max-w-6xl px-6 py-20 sm:py-28">
           <div className="max-w-2xl">
-            <span className="inline-block rounded-full bg-white/10 px-3 py-1 text-xs font-medium text-marigold-400">
+            {/* marigold-300, not -400: on the hero fill the brighter
+                accent only reached 3.9:1, under AA for this size. */}
+            <span className="inline-block rounded-full bg-white/10 px-3 py-1 text-xs font-medium text-marigold-300">
               {t("landing.hero.badge")}
             </span>
             <h1 className="mt-5 text-4xl font-semibold leading-tight text-white sm:text-5xl">

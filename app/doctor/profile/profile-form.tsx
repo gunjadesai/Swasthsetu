@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useTranslation } from "@/lib/i18n/locale-context";
+import { useOfflineFormGuard } from "@/lib/offline-sync/use-offline-guard";
 
 type Initial = {
   fullName: string;
@@ -22,10 +23,11 @@ export function ProfileForm({ initial }: { initial: Initial }) {
     updateDoctorProfile,
     initialState
   );
+  const { offlineError, guardSubmit } = useOfflineFormGuard();
   const t = useTranslation();
 
   return (
-    <form action={formAction} className="mt-6 max-w-lg space-y-5">
+    <form action={formAction} onSubmit={guardSubmit} className="mt-6 max-w-lg space-y-5">
       <div className="grid grid-cols-2 gap-4">
         <div>
           <Label htmlFor="fullName">{t("doctor.profile.fullName")}</Label>
@@ -66,9 +68,9 @@ export function ProfileForm({ initial }: { initial: Initial }) {
         {t("doctor.profile.videoConsultations")}
       </label>
 
-      {state.error && (
+      {(offlineError ?? state.error) && (
         <p role="alert" className="rounded-md bg-danger/10 px-3 py-2 text-sm text-danger">
-          {state.error}
+          {offlineError ?? state.error}
         </p>
       )}
       {state.success && (

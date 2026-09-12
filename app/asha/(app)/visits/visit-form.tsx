@@ -5,15 +5,21 @@ import { useRouter } from "next/navigation";
 import { logFieldVisit, syncFieldVisits } from "./actions";
 import { FIELD_VISIT_STORAGE_KEY, type FieldVisitEntry } from "./offline";
 import { useOfflineSync } from "@/lib/offline-sync/use-offline-sync";
+import { useTranslation } from "@/lib/i18n/locale-context";
 import { Button } from "@/components/ui/button";
 import { Input, Select, Textarea } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 export function VisitForm({
   patients,
+  profileId,
 }: {
   patients: { patient_id: number; full_name: string }[];
+  // Queues are per signed-in ASHA: a shared district phone must not
+  // hand one worker's unsynced visits to the next one who signs in.
+  profileId: string;
 }) {
+  const t = useTranslation();
   const router = useRouter();
   const {
     pending,
@@ -22,8 +28,14 @@ export function VisitForm({
     isSyncing,
     syncError,
     lastSyncedCount,
-  } = useOfflineSync<FieldVisitEntry>(FIELD_VISIT_STORAGE_KEY, syncFieldVisits, () => router.refresh());
+  } = useOfflineSync<FieldVisitEntry>(FIELD_VISIT_STORAGE_KEY, syncFieldVisits, {
+    userKey: profileId,
+    // Clinical notes are encrypted with a device key while they wait.
+    encryptedFields: ["notes"],
+    onSynced: () => router.refresh(),
+  });
   const [message, setMessage] = useState<string | null>(null);
+  const [warning, setWarning] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
@@ -31,10 +43,25 @@ export function VisitForm({
   const combinedMessage =
     message ?? (lastSyncedCount ? `Synced ${lastSyncedCount} queued visit(s).` : null);
 
+  // Queue an entry and say what actually happened. The old version
+  // always reported "saved on this device", including when the write
+  // had silently failed and the visit was gone.
+  async function queueAndReport(entry: FieldVisitEntry, form: HTMLFormElement, savedMessage: string) {
+    const result = await queueVisit(entry);
+    if (!result.ok) {
+      setError(result.reason === "storage-full" ? t("offline.storageFull") : t("offline.storageUnavailable"));
+      return;
+    }
+    setWarning(result.encrypted ? null : t("offline.notEncrypted"));
+    setMessage(savedMessage);
+    form.reset();
+  }
+
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(null);
     setMessage(null);
+    setWarning(null);
     const form = e.currentTarget;
     const formData = new FormData(form);
     const patientId = Number(formData.get("patientId"));
@@ -48,9 +75,11 @@ export function VisitForm({
     }
 
     if (!navigator.onLine) {
-      queueVisit({ patientId, visitDate, purpose, notes });
-      setMessage("You're offline - the visit was saved on this device and will sync automatically.");
-      form.reset();
+      await queueAndReport(
+        { patientId, visitDate, purpose, notes },
+        form,
+        "You're offline - the visit was saved on this device and will sync automatically."
+      );
       return;
     }
 
@@ -66,9 +95,11 @@ export function VisitForm({
       } catch {
         // Network dropped mid-request even though navigator.onLine
         // said we were online - fall back to the same offline queue.
-        queueVisit({ patientId, visitDate, purpose, notes });
-        setMessage("Couldn't reach the server - the visit was saved on this device and will sync automatically.");
-        form.reset();
+        await queueAndReport(
+          { patientId, visitDate, purpose, notes },
+          form,
+          "Couldn't reach the server - the visit was saved on this device and will sync automatically."
+        );
       }
     });
   }
@@ -76,11 +107,16 @@ export function VisitForm({
   return (
     <div className="max-w-md space-y-6">
       {pending.length > 0 && (
-        <div className="flex items-center justify-between rounded-md border border-marigold-500/40 bg-marigold-400/10 px-3 py-2 text-sm">
-          <span>{pending.length} visit(s) waiting to sync</span>
-          <Button type="button" size="sm" variant="secondary" onClick={flushQueue} disabled={isPending || isSyncing}>
-            {isSyncing ? "Syncing..." : "Sync now"}
-          </Button>
+        <div className="rounded-md border border-marigold-500/40 bg-marigold-400/10 px-3 py-2 text-sm">
+          <div className="flex items-center justify-between">
+            <span>{pending.length} visit(s) waiting to sync</span>
+            <Button type="button" size="sm" variant="secondary" onClick={flushQueue} disabled={isPending || isSyncing}>
+              {isSyncing ? "Syncing..." : "Sync now"}
+            </Button>
+          </div>
+          {pending.some((visit) => (visit.attempts ?? 0) > 0) && (
+            <p className="mt-1 text-xs text-ink/70">{t("offline.syncPartial")}</p>
+          )}
         </div>
       )}
 
@@ -115,6 +151,9 @@ export function VisitForm({
           <p role="alert" className="rounded-md bg-danger/10 px-3 py-2 text-sm text-danger">
             {combinedError}
           </p>
+        )}
+        {warning && (
+          <p className="rounded-md bg-marigold-400/15 px-3 py-2 text-sm text-marigold-600">{warning}</p>
         )}
         {combinedMessage && (
           <p className="rounded-md bg-success/10 px-3 py-2 text-sm text-success">{combinedMessage}</p>

@@ -39,7 +39,7 @@ export default async function AshaVisitsPage() {
       </p>
 
       <div className="mt-6 grid gap-8 sm:grid-cols-[minmax(0,320px)_1fr]">
-        <VisitForm patients={patientRows} />
+        <VisitForm patients={patientRows} profileId={user!.id} />
 
         <div>
           <h2 className="text-sm font-semibold text-ink">Recent visits</h2>

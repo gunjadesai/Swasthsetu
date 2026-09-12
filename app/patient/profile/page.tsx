@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { AvatarUploader } from "@/components/avatar-uploader";
 import { decryptPHI } from "@/lib/phi-crypto";
+import { getProfilePhone } from "@/lib/phone-access";
 import { ProfileForm } from "./profile-form";
 
 export default async function PatientProfilePage() {
@@ -12,7 +13,7 @@ export default async function PatientProfilePage() {
   const [{ data: profile }, { data: patient }] = await Promise.all([
     supabase
       .from("profiles")
-      .select("full_name, phone_number, avatar_url")
+      .select("full_name, avatar_url")
       .eq("id", user!.id)
       .single(),
     supabase
@@ -23,6 +24,9 @@ export default async function PatientProfilePage() {
       .eq("profile_id", user!.id)
       .single(),
   ]);
+
+  // Own number, fetched the same way everyone else's is (migration 005).
+  const phone = await getProfilePhone(supabase, user!.id);
 
   return (
     <div className="max-w-lg">
@@ -41,7 +45,7 @@ export default async function PatientProfilePage() {
       <ProfileForm
         initial={{
           fullName: profile?.full_name ?? "",
-          phone: profile?.phone_number ?? "",
+          phone: phone ?? "",
           dateOfBirth: patient?.date_of_birth ?? "",
           gender: patient?.gender ?? "",
           bloodGroup: patient?.blood_group ?? "",

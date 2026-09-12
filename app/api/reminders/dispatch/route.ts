@@ -3,11 +3,15 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { defaultLocale, locales, type Locale } from "@/lib/i18n/dictionaries";
 import { placeVoiceCall, sendSms, type SmsSendResult } from "@/lib/telecom/sms";
 import { say, twimlDocument } from "@/lib/telecom/twiml";
+import { verifyCronRequest } from "@/lib/cron-auth";
 
 // System job, no end-user session - hence the service-role client (see
 // lib/supabase/admin.ts). Call this from a cron trigger (Vercel Cron,
-// Supabase scheduled function, or just manually while testing). When
-// CRON_SECRET is set, the caller must send `Authorization: Bearer <secret>`.
+// Supabase scheduled function, or with curl while testing). CRON_SECRET
+// is required: the caller sends `Authorization: Bearer <secret>` (or
+// x-cron-secret), and with no secret configured the route answers 503
+// rather than leaving a service-role endpoint open to anyone who finds
+// the path - see lib/cron-auth.ts.
 //
 // 'App' reminders are delivered by marking them Sent - the notification
 // bell reads reminders where status = 'Sent'.
@@ -17,9 +21,9 @@ import { say, twimlDocument } from "@/lib/telecom/twiml";
 // only simulated, and the row is marked Failed with that reason - never
 // silently Sent.
 export async function POST(request: Request) {
-  const cronSecret = process.env.CRON_SECRET;
-  if (cronSecret && request.headers.get("authorization") !== `Bearer ${cronSecret}`) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const auth = verifyCronRequest(request);
+  if (!auth.ok) {
+    return NextResponse.json({ error: auth.message }, { status: auth.status });
   }
 
   const admin = createAdminClient();

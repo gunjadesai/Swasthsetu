@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input, Select } from "@/components/ui/input";
 import { useTranslation } from "@/lib/i18n/locale-context";
+import { useOfflineFormGuard } from "@/lib/offline-sync/use-offline-guard";
 
 const daysMap = [
   "day.sunday",
@@ -24,11 +25,13 @@ export function AvailabilityForm() {
     addAvailability,
     initialState
   );
+  const { offlineError, guardSubmit } = useOfflineFormGuard();
   const t = useTranslation();
 
   return (
     <form
       action={formAction}
+      onSubmit={guardSubmit}
       className="grid grid-cols-2 gap-4 sm:grid-cols-4 sm:items-end"
     >
       <div>
@@ -72,12 +75,12 @@ export function AvailabilityForm() {
         </Select>
       </div>
       <div className="col-span-2 sm:col-span-4">
-        {state.error && (
+        {(offlineError ?? state.error) && (
           <p
             role="alert"
             className="mb-2 rounded-md bg-danger/10 px-3 py-2 text-sm text-danger"
           >
-            {state.error}
+            {offlineError ?? state.error}
           </p>
         )}
         <Button type="submit" disabled={pending} size="sm">

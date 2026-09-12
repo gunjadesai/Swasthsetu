@@ -4,6 +4,7 @@ import { IBM_Plex_Sans, IBM_Plex_Sans_Devanagari } from "next/font/google";
 import { getLocale } from "@/lib/i18n/get-dictionary";
 import { LocaleProvider } from "@/lib/i18n/locale-context";
 import { THEME_COOKIE, THEME_INIT_SCRIPT, isThemePreference } from "@/lib/theme";
+import { ServiceWorkerRegistration } from "@/components/service-worker";
 import "./globals.css";
 
 // IBM Plex Sans: chosen partly because its Devanagari + other Indic
@@ -55,6 +56,7 @@ export default async function RootLayout({
       </head>
       <body className="font-sans antialiased">
         <LocaleProvider locale={locale}>{children}</LocaleProvider>
+        <ServiceWorkerRegistration />
       </body>
     </html>
   );

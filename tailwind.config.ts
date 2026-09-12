@@ -47,6 +47,7 @@ const config: Config = {
           900: token("teal-900"),
         },
         marigold: {
+          300: token("marigold-300"),
           400: token("marigold-400"),
           500: token("marigold-500"),
           600: token("marigold-600"),

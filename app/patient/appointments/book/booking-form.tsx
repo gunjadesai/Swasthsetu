@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Input, Select } from "@/components/ui/input";
 import { CONSULT_MODE_LABEL, isRemoteConsult, type ConsultMode } from "@/lib/consult-mode";
 import { cn } from "@/lib/utils";
+import { useOfflineFormGuard } from "@/lib/offline-sync/use-offline-guard";
 
 type DoctorOption = {
   doctor_id: number;
@@ -47,6 +48,7 @@ export function BookingForm({
     bookAppointment,
     initialState
   );
+  const { offlineError, guardSubmit } = useOfflineFormGuard();
   const [mode, setMode] = useState<ConsultMode>(initialMode);
   const [doctorId, setDoctorId] = useState("");
   const [date, setDate] = useState("");
@@ -80,7 +82,7 @@ export function BookingForm({
   }, [doctorId, date]);
 
   return (
-    <form action={formAction} className="mt-6 max-w-lg space-y-5">
+    <form action={formAction} onSubmit={guardSubmit} className="mt-6 max-w-lg space-y-5">
       <fieldset>
         <legend className="mb-1.5 text-sm font-medium text-ink">
           Consultation type
@@ -185,12 +187,12 @@ export function BookingForm({
       )}
       <input type="hidden" name="time" value={time} />
 
-      {state.error && (
+      {(offlineError ?? state.error) && (
         <p
           role="alert"
           className="rounded-md bg-danger/10 px-3 py-2 text-sm text-danger"
         >
-          {state.error}
+          {offlineError ?? state.error}
         </p>
       )}
 

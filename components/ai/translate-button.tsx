@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from "react";
 import { translateText } from "@/lib/ai/translator";
 import { useLocale } from "@/lib/i18n/locale-context";
@@ -21,7 +23,9 @@ export function TranslateButton({ text, to, mode = "general" }: TranslateButtonP
         to: to || locale,
         mode,
       });
-      setTranslated(result);
+      // Only replace the text when something was actually translated -
+      // an unavailable translator leaves the original on screen.
+      if (result.translated) setTranslated(result.text);
     } catch (e) {
       console.error(e);
     }

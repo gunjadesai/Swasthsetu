@@ -2,6 +2,8 @@ import { createClient } from "@/lib/supabase/server";
 import { getDictionary } from "@/lib/i18n/get-dictionary";
 import { RequestBoard } from "./request-board";
 
+export const dynamic = "force-dynamic";
+
 export default async function AmbulanceDashboardPage() {
   const supabase = await createClient();
   const {
@@ -13,6 +15,9 @@ export default async function AmbulanceDashboardPage() {
     .eq("driver_profile_id", user!.id)
     .single();
 
+  // Unassigned requests became visible to on-duty drivers in migration
+  // 005 (scoped to their district). Before that this query always came
+  // back empty, which is why nobody could accept anything.
   const { data: openRequests } = await supabase
     .from("ambulance_requests")
     .select("request_id, pickup_latitude, pickup_longitude, status, requested_at")
@@ -24,12 +29,8 @@ export default async function AmbulanceDashboardPage() {
     .from("ambulance_requests")
     .select("request_id, pickup_latitude, pickup_longitude, status, requested_at")
     .eq("ambulance_id", ambulance?.ambulance_id ?? -1)
-    .eq("status", "Dispatched");
-
-  const mapRow = (r: { request_id: number; pickup_latitude: number | null; pickup_longitude: number | null; status: string; requested_at: string }) => ({
-    ...r,
-    mine: false,
-  });
+    .eq("status", "Dispatched")
+    .order("requested_at", { ascending: true });
 
   const t = await getDictionary();
 
@@ -40,8 +41,8 @@ export default async function AmbulanceDashboardPage() {
         <RequestBoard
           ambulanceId={ambulance?.ambulance_id ?? 0}
           isAvailable={ambulance?.is_available ?? false}
-          openRequests={(openRequests ?? []).map(mapRow)}
-          myActiveRequests={(myActive ?? []).map(mapRow)}
+          openRequests={openRequests ?? []}
+          myActiveRequests={myActive ?? []}
         />
       </div>
     </div>

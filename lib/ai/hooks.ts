@@ -44,7 +44,10 @@ export function useAiTranslate({ mode = "general", context }: UseAiTranslateOpti
         const json = await res.json();
         const result: string = json.translatedText ?? text;
 
-        cache.current[cacheKey] = result;
+        // A "translated: false" answer means the translator is not
+        // configured or failed; don't cache the untranslated text as if
+        // it were a translation, so a later retry can still work.
+        if (json.translated) cache.current[cacheKey] = result;
         setTranslations((prev) => ({ ...prev, [cacheKey]: result }));
         return result;
       } catch (err) {

@@ -5,14 +5,16 @@ import { createScheme, type SchemeState } from "./actions";
 import { Button } from "@/components/ui/button";
 import { Input, Textarea } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useOfflineFormGuard } from "@/lib/offline-sync/use-offline-guard";
 
 const initialState: SchemeState = {};
 
 export function SchemeForm() {
   const [state, formAction, pending] = useActionState(createScheme, initialState);
+  const { offlineError, guardSubmit } = useOfflineFormGuard();
 
   return (
-    <form action={formAction} className="grid max-w-2xl gap-4 sm:grid-cols-2">
+    <form action={formAction} onSubmit={guardSubmit} className="grid max-w-2xl gap-4 sm:grid-cols-2">
       <div>
         <Label htmlFor="scheme_name">Scheme name (English)</Label>
         <Input id="scheme_name" name="scheme_name" required />
@@ -38,9 +40,9 @@ export function SchemeForm() {
         <Textarea id="eligibility_criteria_hi" name="eligibility_criteria_hi" rows={2} />
       </div>
 
-      {state.error && (
+      {(offlineError ?? state.error) && (
         <p role="alert" className="sm:col-span-2 rounded-md bg-danger/10 px-3 py-2 text-sm text-danger">
-          {state.error}
+          {offlineError ?? state.error}
         </p>
       )}
 

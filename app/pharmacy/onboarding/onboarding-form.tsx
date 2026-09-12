@@ -5,6 +5,7 @@ import { completePharmacyStaffOnboarding, type OnboardState } from "./actions";
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useOfflineFormGuard } from "@/lib/offline-sync/use-offline-guard";
 
 const initialState: OnboardState = {};
 
@@ -14,9 +15,10 @@ export function OnboardingForm({
   pharmacies: { pharmacy_id: number; name: string }[];
 }) {
   const [state, formAction, pending] = useActionState(completePharmacyStaffOnboarding, initialState);
+  const { offlineError, guardSubmit } = useOfflineFormGuard();
 
   return (
-    <form action={formAction} className="max-w-sm space-y-4">
+    <form action={formAction} onSubmit={guardSubmit} className="max-w-sm space-y-4">
       <div>
         <Label htmlFor="pharmacyId">Pharmacy</Label>
         <Select id="pharmacyId" name="pharmacyId" required defaultValue="">
@@ -31,9 +33,9 @@ export function OnboardingForm({
         </Select>
       </div>
 
-      {state.error && (
+      {(offlineError ?? state.error) && (
         <p role="alert" className="rounded-md bg-danger/10 px-3 py-2 text-sm text-danger">
-          {state.error}
+          {offlineError ?? state.error}
         </p>
       )}
 

@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { TeleconsultRoom } from "@/components/teleconsult-room";
 import { consultModeLabel, isRemoteConsult } from "@/lib/consult-mode";
 import { decryptPHI, decryptPHIJson } from "@/lib/phi-crypto";
+import { getProfilePhone } from "@/lib/phone-access";
 import { logPhiAccess } from "@/lib/audit";
 import type { AiTriageAssessment } from "@/lib/ai-triage";
 import { ConsultForm } from "./consult-form";
@@ -15,7 +16,7 @@ type PatientInfo = {
   date_of_birth: string | null;
   gender: string | null;
   blood_group: string | null;
-  profiles: { full_name: string; phone_number: string | null } | null;
+  profiles: { id: string; full_name: string } | null;
 } | null;
 
 type PrescriptionItem = {
@@ -50,7 +51,7 @@ export default async function AppointmentDetailPage({
   const { data: appointment } = await supabase
     .from("appointments")
     .select(
-      "appointment_id, appointment_date, appointment_time, status, mode, doctor_id, patient_id, patients(date_of_birth, gender, blood_group, profiles(full_name, phone_number))"
+      "appointment_id, appointment_date, appointment_time, status, mode, doctor_id, patient_id, patients(date_of_birth, gender, blood_group, profiles(id, full_name))"
     )
     .eq("appointment_id", appointmentId)
     .single();
@@ -82,6 +83,9 @@ export default async function AppointmentDetailPage({
     ]);
 
   const patient = appointment.patients as unknown as PatientInfo;
+  // The database decides whether this doctor gets the number - see
+  // lib/phone-access.ts and migration 005.
+  const patientPhone = await getProfilePhone(supabase, patient?.profiles?.id);
 
   const { data: record } = await supabase
     .from("medical_records")
@@ -122,11 +126,7 @@ export default async function AppointmentDetailPage({
                 : ""}
               {patient?.blood_group ? ` · ${patient.blood_group}` : ""}
             </p>
-            {patient?.profiles?.phone_number && (
-              <p className="text-sm text-ink/70">
-                {patient.profiles.phone_number}
-              </p>
-            )}
+            {patientPhone && <p className="text-sm text-ink/70">{patientPhone}</p>}
           </div>
           <div className="text-right">
             <p className="text-sm text-ink">
@@ -220,13 +220,13 @@ export default async function AppointmentDetailPage({
                 appointmentId={appointment.appointment_id}
                 mode={appointment.mode === "VoiceConsult" ? "voice" : "video"}
               />
-              {appointment.mode === "VoiceConsult" && patient?.profiles?.phone_number && (
+              {appointment.mode === "VoiceConsult" && patientPhone && (
                 <a
-                  href={`tel:${patient.profiles.phone_number}`}
+                  href={`tel:${patientPhone}`}
                   className="inline-flex items-center gap-2 text-sm font-medium text-teal-600"
                 >
                   <Phone className="h-4 w-4" />
-                  Patient on a keypad phone? Call {patient.profiles.phone_number} directly
+                  Patient on a keypad phone? Call {patientPhone} directly
                 </a>
               )}
             </div>

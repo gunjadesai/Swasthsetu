@@ -286,6 +286,48 @@ Services, Particularly in Rural and Underserved Areas."
   **Status: type-checks and builds; migration 004 not yet run. Offline
   sync issues from the audit deliberately left for later.**
 
+- [x] **Phase 9 — Open-issue clearance**
+  (`supabase/migrations/005_open_issue_fixes.sql`)
+  *Ambulance dispatch (was the critical one):* a scoped SELECT arm lets a
+  verified, on-duty driver see unassigned requests in their district
+  (district derived from the destination hospital or the patient's
+  village; an undetermined district stays visible to every on-duty
+  driver, because an emergency must never be invisible), and
+  `claim_ambulance_request()` claims one in a single atomic statement -
+  the second driver to tap Accept is told it's taken instead of silently
+  stealing the dispatch. The update policy gained the `WITH CHECK` it
+  never had.
+  *Reminder dispatch:* `CRON_SECRET` is now required - `503` when unset
+  instead of an open service-role endpoint (`lib/cron-auth.ts`).
+  *Offline sync:* queues are namespaced per signed-in profile, notes are
+  encrypted under a non-extractable device key (Web Crypto + IndexedDB),
+  every entry carries an idempotency key enforced by a unique index, a
+  failed storage write is reported instead of a false "saved", the queue
+  auto-flushes on page load as well as on `online`, one bad entry no
+  longer blocks the batch, and a sync that hangs times out. A minimal
+  service worker keeps the shell loadable and serves `/offline`
+  (four languages, "call 108") - build assets only, never a signed-in
+  page or an API response.
+  *Consultations:* `record_consultation()` writes record, prescription,
+  items, referral, lab order and appointment status in one transaction.
+  *Privacy:* `phone_number` is out of the `authenticated` column grant;
+  `profile_phone()` answers only for the owner, an admin, a treating
+  doctor, the registering ASHA, or a currently dispatched ambulance.
+  *Translation:* `/api/ai/translate` requires a session, caps length,
+  validates the target language, rate-limits per user, and uses the
+  project's Gemini key - no more fake `[HI] ...` output with no key set.
+  *Forms:* one `useOfflineFormGuard()` hook replaces the crash-on-submit
+  behaviour of ~15 `useActionState` forms offline; the emergency form
+  says "call 108" instead.
+  *Contrast:* light-theme `success`, `marigold-600` and the landing hero
+  badge now clear WCAG AA.
+  **Status: type-checks, builds, and the whole migration chain
+  (schema + 002-005) was applied to a scratch Postgres 16 and exercised -
+  two drivers racing for one request, phone-number access by role,
+  transactional rollback of a consultation, double-sync of a field visit.
+  Not run against the live Supabase project; UI flows behind a login were
+  not click-tested.**
+
 ## 7. Open Questions
 
 1. **Cloudinary cloud name** — still needed. Avatar upload *and* lab
@@ -299,6 +341,20 @@ Services, Particularly in Rural and Underserved Areas."
    integration (needs org registration), an accessibility audit, and
    automated tests. See the Architecture Decisions above for why each
    was scoped the way it was.
+4. **Marathi needs a native speaker.** The Marathi dictionary strings and
+   the Marathi keyword lists in `lib/triage.ts` were written without one.
+   Rules can only raise urgency, so a missed keyword degrades to a
+   lower-confidence result rather than a false "you're fine" - but this
+   is a review task nobody on the team can close alone.
+5. **DLT registration for Indian SMS** is a paperwork task, not a code
+   one: entity ID, sender header, and one approved template per message
+   per language. The steps and where the message texts live are in the
+   README ("Real SMS in India (DLT)"). Until it's done, leave
+   `SMS_PROVIDER` unset so messages record as `Simulated`, never `Sent`.
+6. **Field-visit notes are still stored unencrypted in the database.**
+   They are encrypted on the device while queued and in transit, but
+   `asha_field_visits.notes` is not in the PHI-encrypted column set the
+   way diagnoses and triage text are. Worth closing next.
 
 ## 8. Reusable Kickoff Prompt
 
