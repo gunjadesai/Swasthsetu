@@ -14,7 +14,7 @@ export function DeleteAvailabilityButton({ id }: { id: number }) {
         })
       }
       disabled={pending}
-      className="text-ink/40 transition-colors hover:text-danger disabled:opacity-50"
+      className="text-ink/70 transition-colors hover:text-danger disabled:opacity-50"
       aria-label="Remove this availability block"
     >
       <X className="h-4 w-4" />

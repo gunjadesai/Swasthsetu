@@ -26,7 +26,7 @@ export function FeedbackList({ items }: { items: FeedbackRow[] }) {
               {f.rating ? ` - ${f.rating}/5` : ""}
               {f.hospitalName ? ` - ${f.hospitalName}` : ""}
             </span>
-            <span className="text-xs text-ink/50">{f.status}</span>
+            <span className="text-xs text-ink/70">{f.status}</span>
           </div>
           {f.comments && <p className="mt-1 text-sm text-ink/70">{f.comments}</p>}
           {f.status !== "Resolved" && (
@@ -52,7 +52,7 @@ export function FeedbackList({ items }: { items: FeedbackRow[] }) {
           )}
         </div>
       ))}
-      {items.length === 0 && <p className="text-sm text-ink/50">No feedback yet.</p>}
+      {items.length === 0 && <p className="text-sm text-ink/70">No feedback yet.</p>}
     </div>
   );
 }

@@ -15,7 +15,7 @@ export default function LoginPage() {
   return (
     <main className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-6 py-16">
       <h1 className="text-2xl font-semibold text-ink">Sign in</h1>
-      <p className="mt-1 text-sm text-ink/60">
+      <p className="mt-1 text-sm text-ink/70">
         Welcome back.
       </p>
 
@@ -49,7 +49,7 @@ export default function LoginPage() {
         </Button>
       </form>
 
-      <p className="mt-6 text-sm text-ink/60">
+      <p className="mt-6 text-sm text-ink/70">
         New here?{" "}
         <Link href="/signup" className="font-medium text-teal-600">
           Create an account

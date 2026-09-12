@@ -81,9 +81,9 @@ export function BookingForm({ doctors }: { doctors: DoctorOption[] }) {
         <div>
           <Label>Available times</Label>
           {loadingSlots ? (
-            <p className="text-sm text-ink/50">Checking availability...</p>
+            <p className="text-sm text-ink/70">Checking availability...</p>
           ) : slots.length === 0 ? (
-            <p className="text-sm text-ink/50">
+            <p className="text-sm text-ink/70">
               No open slots this day - try another date.
             </p>
           ) : (

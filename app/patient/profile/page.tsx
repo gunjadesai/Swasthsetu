@@ -26,7 +26,7 @@ export default async function PatientProfilePage() {
   return (
     <div className="max-w-lg">
       <h1 className="text-2xl font-semibold text-ink">My profile</h1>
-      <p className="mt-1 text-sm text-ink/60">
+      <p className="mt-1 text-sm text-ink/70">
         Keep this up to date - doctors see it when you book an appointment.
       </p>
 
@@ -52,7 +52,7 @@ export default async function PatientProfilePage() {
       {patient?.patient_id && (
         <div className="mt-8 rounded-md border border-line bg-white p-4">
           <p className="text-sm font-medium text-ink">Health ID</p>
-          <p className="text-sm text-ink/60">{patient.health_id_number ?? "Not yet assigned"}</p>
+          <p className="text-sm text-ink/70">{patient.health_id_number ?? "Not yet assigned"}</p>
           <a
             href={`/api/fhir/patient/${patient.patient_id}/summary`}
             target="_blank"

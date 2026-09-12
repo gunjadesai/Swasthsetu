@@ -28,7 +28,7 @@ export default async function SchemesPage() {
               <h2 className="font-semibold text-ink">{name}</h2>
               {description && <p className="mt-1 text-sm text-ink/70">{description}</p>}
               {eligibility && (
-                <p className="mt-2 text-xs text-ink/50">
+                <p className="mt-2 text-xs text-ink/70">
                   <span className="font-medium">{t("schemes.eligibility")}: </span>
                   {eligibility}
                 </p>
@@ -37,7 +37,7 @@ export default async function SchemesPage() {
           );
         })}
         {(!schemes || schemes.length === 0) && (
-          <p className="text-sm text-ink/60">No schemes published yet.</p>
+          <p className="text-sm text-ink/70">No schemes published yet.</p>
         )}
       </div>
     </div>

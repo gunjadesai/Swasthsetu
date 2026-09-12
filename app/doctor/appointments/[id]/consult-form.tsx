@@ -138,7 +138,7 @@ export function ConsultForm({
                 <button
                   type="button"
                   onClick={() => removeItem(i)}
-                  className="text-ink/40 hover:text-danger"
+                  className="text-ink/70 hover:text-danger"
                   aria-label="Remove medicine"
                 >
                   <Trash2 className="h-4 w-4" />

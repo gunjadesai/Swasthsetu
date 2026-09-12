@@ -26,7 +26,7 @@ export default async function DoctorProfilePage() {
   return (
     <div className="max-w-lg">
       <h1 className="text-2xl font-semibold text-ink">{t("doctor.profile.title")}</h1>
-      <p className="mt-1 text-sm text-ink/60">
+      <p className="mt-1 text-sm text-ink/70">
         {t("doctor.profile.subtitle")}
       </p>
 

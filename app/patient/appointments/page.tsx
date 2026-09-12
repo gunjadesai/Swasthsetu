@@ -107,7 +107,7 @@ export default async function PatientAppointmentsPage({
               "px-3 py-2 text-sm font-medium",
               activeTab === tab
                 ? "border-b-2 border-teal-600 text-teal-700"
-                : "text-ink/60 hover:text-ink"
+                : "text-ink/70 hover:text-ink"
             )}
           >
             {tab === "Completed" ? "Completed consultations" : tab}
@@ -117,7 +117,7 @@ export default async function PatientAppointmentsPage({
 
       {!appointments || appointments.length === 0 ? (
         <Card className="mt-6 flex flex-col items-center justify-center py-10 text-center">
-          <p className="text-sm text-ink/60">
+          <p className="text-sm text-ink/70">
             {activeTab === "All"
               ? "No appointments yet."
               : `No ${activeTab.toLowerCase()} appointments.`}
@@ -137,7 +137,7 @@ export default async function PatientAppointmentsPage({
                     <p className="font-medium text-ink">
                       Dr. {doctor?.profiles?.full_name ?? "Unknown"}
                     </p>
-                    <p className="text-sm text-ink/60">
+                    <p className="text-sm text-ink/70">
                       {doctor?.specialization ?? "General"} ·{" "}
                       {appt.mode === "Teleconsult" ? "Video consult" : "In person"}
                     </p>

@@ -52,7 +52,7 @@ export default async function AdminDashboardPage() {
       <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {stats.map((s) => (
           <div key={s.label} className="rounded-lg border border-line bg-white p-5">
-            <p className="text-sm text-ink/60">{s.label}</p>
+            <p className="text-sm text-ink/70">{s.label}</p>
             <p className="mt-1 text-3xl font-bold text-teal-600">{s.value}</p>
           </div>
         ))}

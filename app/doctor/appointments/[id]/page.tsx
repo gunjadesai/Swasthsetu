@@ -85,7 +85,7 @@ export default async function AppointmentDetailPage({
             <p className="text-lg font-semibold text-ink">
               {patient?.profiles?.full_name ?? "Patient"}
             </p>
-            <p className="text-sm text-ink/60">
+            <p className="text-sm text-ink/70">
               {patient?.gender ?? "Unknown gender"}
               {patient?.date_of_birth
                 ? ` · Born ${format(new Date(patient.date_of_birth), "d MMM yyyy")}`
@@ -93,7 +93,7 @@ export default async function AppointmentDetailPage({
               {patient?.blood_group ? ` · ${patient.blood_group}` : ""}
             </p>
             {patient?.profiles?.phone_number && (
-              <p className="text-sm text-ink/60">
+              <p className="text-sm text-ink/70">
                 {patient.profiles.phone_number}
               </p>
             )}
@@ -159,7 +159,7 @@ export default async function AppointmentDetailPage({
           />
         </>
       ) : (
-        <p className="mt-6 text-sm text-ink/60">
+        <p className="mt-6 text-sm text-ink/70">
           This appointment was {appointment.status.toLowerCase()}.
         </p>
       )}

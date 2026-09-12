@@ -35,11 +35,11 @@ export default async function AshaDashboardPage() {
 
       <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div className="rounded-lg border border-line bg-white p-5">
-          <p className="text-sm text-ink/60">{t("asha.dashboard.patientsRegistered")}</p>
+          <p className="text-sm text-ink/70">{t("asha.dashboard.patientsRegistered")}</p>
           <p className="mt-1 text-3xl font-bold text-teal-600">{patientCount ?? 0}</p>
         </div>
         <div className="rounded-lg border border-line bg-white p-5">
-          <p className="text-sm text-ink/60">{t("asha.dashboard.visitsLogged")}</p>
+          <p className="text-sm text-ink/70">{t("asha.dashboard.visitsLogged")}</p>
           <p className="mt-1 text-3xl font-bold text-teal-600">{visitCount ?? 0}</p>
         </div>
       </div>

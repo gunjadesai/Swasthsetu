@@ -56,7 +56,7 @@ export default async function PatientDashboardPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold text-ink">{t("dashboard.overview")}</h1>
-          <p className="mt-1 text-sm text-ink/60">
+          <p className="mt-1 text-sm text-ink/70">
             {t("dashboard.patientSubtitle")}
           </p>
         </div>
@@ -71,7 +71,7 @@ export default async function PatientDashboardPage() {
             <p className="text-3xl font-semibold text-teal-600">
               {totalCount ?? 0}
             </p>
-            <p className="mt-1 text-sm text-ink/60">{t("dashboard.totalAppointments")}</p>
+            <p className="mt-1 text-sm text-ink/70">{t("dashboard.totalAppointments")}</p>
           </Card>
         </Link>
         <Link href="/patient/appointments?status=Completed">
@@ -79,7 +79,7 @@ export default async function PatientDashboardPage() {
             <p className="text-3xl font-semibold text-teal-600">
               {completedCount ?? 0}
             </p>
-            <p className="mt-1 text-sm text-ink/60">{t("dashboard.completedConsultations")}</p>
+            <p className="mt-1 text-sm text-ink/70">{t("dashboard.completedConsultations")}</p>
           </Card>
         </Link>
       </div>
@@ -113,7 +113,7 @@ export default async function PatientDashboardPage() {
                     <p className="font-medium text-ink">
                       Dr. {doctor?.profiles?.full_name ?? "Unknown"}
                     </p>
-                    <p className="text-sm text-ink/60">
+                    <p className="text-sm text-ink/70">
                       {doctor?.specialization ?? "General"}
                     </p>
                   </div>
@@ -133,7 +133,7 @@ export default async function PatientDashboardPage() {
         ) : (
           <Card className="flex flex-col items-center justify-center py-10 text-center">
             <Calendar className="h-8 w-8 text-ink/30" />
-            <p className="mt-3 text-sm text-ink/60">
+            <p className="mt-3 text-sm text-ink/70">
               {t("dashboard.noUpcomingAppointments")}
             </p>
             <Link href="/patient/appointments/book" className="mt-3">

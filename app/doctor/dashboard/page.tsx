@@ -51,7 +51,7 @@ export default async function DoctorDashboardPage() {
   return (
     <div className="max-w-4xl">
       <h1 className="text-2xl font-semibold text-ink">{t("dashboard.overview")}</h1>
-      <p className="mt-1 text-sm text-ink/60">
+      <p className="mt-1 text-sm text-ink/70">
         {new Date().toLocaleDateString(todayLocale, { weekday: "long", day: "numeric", month: "long" })}
       </p>
 
@@ -60,17 +60,17 @@ export default async function DoctorDashboardPage() {
           <p className="text-3xl font-semibold text-teal-600">
             {todayAppts?.length ?? 0}
           </p>
-          <p className="mt-1 text-sm text-ink/60">{t("dashboard.appointmentsToday")}</p>
+          <p className="mt-1 text-sm text-ink/70">{t("dashboard.appointmentsToday")}</p>
         </Card>
         <Card>
           <p className="text-3xl font-semibold text-teal-600">{totalCount ?? 0}</p>
-          <p className="mt-1 text-sm text-ink/60">{t("dashboard.totalAppointments")}</p>
+          <p className="mt-1 text-sm text-ink/70">{t("dashboard.totalAppointments")}</p>
         </Card>
         <Card>
           <p className="text-3xl font-semibold text-teal-600">
             {completedCount ?? 0}
           </p>
-          <p className="mt-1 text-sm text-ink/60">{t("dashboard.completedConsultations")}</p>
+          <p className="mt-1 text-sm text-ink/70">{t("dashboard.completedConsultations")}</p>
         </Card>
       </div>
 
@@ -95,7 +95,7 @@ export default async function DoctorDashboardPage() {
                       <p className="font-medium text-ink">
                         {patient?.profiles?.full_name ?? "Patient"}
                       </p>
-                      <p className="text-sm text-ink/60">
+                      <p className="text-sm text-ink/70">
                         {appt.mode === "Teleconsult" ? t("dashboard.videoConsult") : t("dashboard.inPerson")}
                       </p>
                     </div>
@@ -115,7 +115,7 @@ export default async function DoctorDashboardPage() {
         ) : (
           <Card className="flex flex-col items-center justify-center py-10 text-center">
             <CalendarClock className="h-8 w-8 text-ink/30" />
-            <p className="mt-3 text-sm text-ink/60">
+            <p className="mt-3 text-sm text-ink/70">
               {t("dashboard.nothingOnSchedule")}
             </p>
           </Card>

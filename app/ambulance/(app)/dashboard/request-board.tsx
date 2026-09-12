@@ -90,7 +90,7 @@ export function RequestBoard({
               </Button>
             </div>
           ))}
-          {openRequests.length === 0 && <p className="text-sm text-ink/50">No open requests right now.</p>}
+          {openRequests.length === 0 && <p className="text-sm text-ink/70">No open requests right now.</p>}
         </div>
       </div>
     </div>

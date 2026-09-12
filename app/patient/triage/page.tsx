@@ -7,7 +7,7 @@ export default async function PatientTriagePage() {
   return (
     <div className="max-w-2xl">
       <h1 className="text-2xl font-semibold text-ink">{t("triage.title")}</h1>
-      <p className="mt-1 text-sm text-ink/60">{t("triage.subtitle")}</p>
+      <p className="mt-1 text-sm text-ink/70">{t("triage.subtitle")}</p>
       <div className="mt-6">
         <TriageWizard />
       </div>

@@ -34,6 +34,6 @@ export function CardDescription({
   ...props
 }: HTMLAttributes<HTMLParagraphElement>) {
   return (
-    <p className={cn("mt-1 text-sm text-ink/60", className)} {...props} />
+    <p className={cn("mt-1 text-sm text-ink/70", className)} {...props} />
   );
 }

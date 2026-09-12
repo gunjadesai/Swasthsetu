@@ -47,7 +47,7 @@ export function EmergencyForm() {
       <input type="hidden" name="longitude" value={coords?.lng ?? ""} />
       {triageId && <input type="hidden" name="triageId" value={triageId} />}
 
-      <p className="text-sm text-ink/60">{t("emergency.subtitle")}</p>
+      <p className="text-sm text-ink/70">{t("emergency.subtitle")}</p>
       {locationError && (
         <p className="text-xs text-marigold-600">{locationError}</p>
       )}

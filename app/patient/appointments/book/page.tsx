@@ -18,11 +18,11 @@ export default async function BookAppointmentPage() {
   return (
     <div className="max-w-2xl">
       <h1 className="text-2xl font-semibold text-ink">Book an appointment</h1>
-      <p className="mt-1 text-sm text-ink/60">
+      <p className="mt-1 text-sm text-ink/70">
         Pick a doctor, then a date to see open times.
       </p>
       {doctorOptions.length === 0 ? (
-        <p className="mt-6 text-sm text-ink/60">
+        <p className="mt-6 text-sm text-ink/70">
           No doctors have set up availability yet - check back soon.
         </p>
       ) : (

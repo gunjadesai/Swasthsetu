@@ -36,7 +36,7 @@ export function QueueBoard({ tickets }: { tickets: Ticket[] }) {
           <div>
             <p className="text-lg font-semibold text-ink">#{ticket.token_number}</p>
             <p className="text-sm text-ink/70">{ticket.patientName}</p>
-            <p className="text-xs text-ink/50">{ticket.status}</p>
+            <p className="text-xs text-ink/70">{ticket.status}</p>
           </div>
           <div className="flex gap-2">
             {ticket.status === "Waiting" && (
@@ -62,7 +62,7 @@ export function QueueBoard({ tickets }: { tickets: Ticket[] }) {
           </div>
         </div>
       ))}
-      {tickets.length === 0 && <p className="text-sm text-ink/50">No one in the queue right now.</p>}
+      {tickets.length === 0 && <p className="text-sm text-ink/70">No one in the queue right now.</p>}
     </div>
   );
 }

@@ -57,9 +57,9 @@ export function OrderRow({ order }: { order: Order }) {
       <div className="flex items-center justify-between">
         <div>
           <p className="font-medium text-ink">{order.patientName}</p>
-          <p className="text-ink/60">{order.testName}</p>
+          <p className="text-ink/70">{order.testName}</p>
         </div>
-        <span className="text-xs text-ink/50">{order.status}</span>
+        <span className="text-xs text-ink/70">{order.status}</span>
       </div>
 
       {order.status === "Ordered" && (

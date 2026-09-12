@@ -124,7 +124,7 @@ export default async function HomePage() {
                 <r.icon className="h-5 w-5" />
               </div>
               <p className="mt-4 font-semibold text-ink">{r.title}</p>
-              <p className="mt-1 text-sm leading-relaxed text-ink/60">{r.desc}</p>
+              <p className="mt-1 text-sm leading-relaxed text-ink/70">{r.desc}</p>
             </div>
           ))}
         </div>
@@ -141,7 +141,7 @@ export default async function HomePage() {
                   <f.icon className="h-5 w-5" />
                 </div>
                 <p className="mt-4 font-semibold text-ink">{f.title}</p>
-                <p className="mt-1 text-sm leading-relaxed text-ink/60">{f.desc}</p>
+                <p className="mt-1 text-sm leading-relaxed text-ink/70">{f.desc}</p>
               </div>
             ))}
           </div>
@@ -153,7 +153,7 @@ export default async function HomePage() {
         <div className="flex flex-col items-start justify-between gap-6 rounded-lg border border-line bg-white p-8 sm:flex-row sm:items-center">
           <div>
             <p className="text-xl font-semibold text-ink">{t("landing.title")}</p>
-            <p className="mt-1 text-sm text-ink/60">{t("landing.footer.tagline")}</p>
+            <p className="mt-1 text-sm text-ink/70">{t("landing.footer.tagline")}</p>
           </div>
           <Link href="/signup">
             <Button size="md" className="whitespace-nowrap">
@@ -166,7 +166,7 @@ export default async function HomePage() {
 
       {/* Footer */}
       <footer className="border-t border-line bg-white">
-        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-6 py-8 text-sm text-ink/50 sm:flex-row">
+        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-6 py-8 text-sm text-ink/70 sm:flex-row">
           <span>{t("app.name")}</span>
           <span>{t("landing.footer.tagline")}</span>
         </div>

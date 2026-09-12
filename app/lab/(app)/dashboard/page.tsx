@@ -39,7 +39,7 @@ export default async function LabDashboardPage() {
         {rows.map((o) => (
           <OrderRow key={o.order_id} order={o} />
         ))}
-        {rows.length === 0 && <p className="text-sm text-ink/50">{t("lab.dashboard.noPendingOrders")}</p>}
+        {rows.length === 0 && <p className="text-sm text-ink/70">{t("lab.dashboard.noPendingOrders")}</p>}
       </div>
     </div>
   );

@@ -37,7 +37,7 @@ export default async function DoctorAppointmentsPage() {
 
       {!appointments || appointments.length === 0 ? (
         <Card className="mt-6 flex flex-col items-center justify-center py-10 text-center">
-          <p className="text-sm text-ink/60">{t("doctor.appointments.empty")}</p>
+          <p className="text-sm text-ink/70">{t("doctor.appointments.empty")}</p>
         </Card>
       ) : (
         <div className="mt-6 space-y-3">
@@ -55,7 +55,7 @@ export default async function DoctorAppointmentsPage() {
                     <p className="font-medium text-ink">
                       {patient?.profiles?.full_name ?? "Patient"}
                     </p>
-                    <p className="text-sm text-ink/60">
+                    <p className="text-sm text-ink/70">
                       {appt.mode === "Teleconsult" ? t("dashboard.videoConsult") : t("dashboard.inPerson")}
                     </p>
                   </div>

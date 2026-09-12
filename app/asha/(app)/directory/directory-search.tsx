@@ -36,10 +36,10 @@ export function DirectorySearch({
           {filteredVillages.map((v) => (
             <div key={v.id} className="rounded-md border border-line bg-white px-3 py-2 text-sm">
               <span className="font-medium text-ink">{v.label}</span>
-              {v.sub && <span className="text-ink/50"> - {v.sub}</span>}
+              {v.sub && <span className="text-ink/70"> - {v.sub}</span>}
             </div>
           ))}
-          {filteredVillages.length === 0 && <p className="text-sm text-ink/50">No matches.</p>}
+          {filteredVillages.length === 0 && <p className="text-sm text-ink/70">No matches.</p>}
         </div>
       </div>
 
@@ -49,10 +49,10 @@ export function DirectorySearch({
           {filteredHospitals.map((h) => (
             <div key={h.id} className="rounded-md border border-line bg-white px-3 py-2 text-sm">
               <span className="font-medium text-ink">{h.label}</span>
-              {h.sub && <span className="text-ink/50"> - {h.sub}</span>}
+              {h.sub && <span className="text-ink/70"> - {h.sub}</span>}
             </div>
           ))}
-          {filteredHospitals.length === 0 && <p className="text-sm text-ink/50">No matches.</p>}
+          {filteredHospitals.length === 0 && <p className="text-sm text-ink/70">No matches.</p>}
         </div>
       </div>
     </div>

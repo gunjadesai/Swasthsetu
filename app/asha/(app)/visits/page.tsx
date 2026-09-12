@@ -33,7 +33,7 @@ export default async function AshaVisitsPage() {
   return (
     <div className="max-w-3xl">
       <h1 className="text-2xl font-semibold text-ink">Field visits</h1>
-      <p className="mt-1 text-sm text-ink/60">
+      <p className="mt-1 text-sm text-ink/70">
         Works offline - visits logged with no signal are saved on this
         device and sync automatically once you're back online.
       </p>
@@ -51,7 +51,7 @@ export default async function AshaVisitsPage() {
                     {(v.patients as unknown as { profiles?: { full_name?: string } } | null)?.profiles
                       ?.full_name ?? "Patient"}
                   </span>
-                  <span className="text-xs text-ink/50">{v.visit_date}</span>
+                  <span className="text-xs text-ink/70">{v.visit_date}</span>
                 </div>
                 {v.purpose && <p className="mt-1 text-ink/70">{v.purpose}</p>}
                 {v.is_synced_from_offline && (
@@ -62,7 +62,7 @@ export default async function AshaVisitsPage() {
               </div>
             ))}
             {(!visits || visits.length === 0) && (
-              <p className="text-sm text-ink/50">No visits logged yet.</p>
+              <p className="text-sm text-ink/70">No visits logged yet.</p>
             )}
           </div>
         </div>

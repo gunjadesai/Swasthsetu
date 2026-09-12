@@ -50,7 +50,7 @@ export default async function DoctorAvailabilityPage() {
   return (
     <div className="max-w-3xl">
       <h1 className="text-2xl font-semibold text-ink">{t("doctor.availability.title")}</h1>
-      <p className="mt-1 text-sm text-ink/60">
+      <p className="mt-1 text-sm text-ink/70">
         {t("doctor.availability.subtitle")}
       </p>
 
@@ -83,7 +83,7 @@ export default async function DoctorAvailabilityPage() {
           );
         })}
         {(availability ?? []).length === 0 && (
-          <p className="text-sm text-ink/60">
+          <p className="text-sm text-ink/70">
             {t("doctor.availability.empty")}
           </p>
         )}
