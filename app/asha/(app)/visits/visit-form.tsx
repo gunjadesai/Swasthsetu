@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { logFieldVisit, syncFieldVisits } from "./actions";
 import { FIELD_VISIT_STORAGE_KEY, type FieldVisitEntry } from "./offline";
 import { useOfflineSync } from "@/lib/offline-sync/use-offline-sync";
@@ -13,6 +14,7 @@ export function VisitForm({
 }: {
   patients: { patient_id: number; full_name: string }[];
 }) {
+  const router = useRouter();
   const {
     pending,
     enqueue: queueVisit,
@@ -20,7 +22,7 @@ export function VisitForm({
     isSyncing,
     syncError,
     lastSyncedCount,
-  } = useOfflineSync<FieldVisitEntry>(FIELD_VISIT_STORAGE_KEY, syncFieldVisits);
+  } = useOfflineSync<FieldVisitEntry>(FIELD_VISIT_STORAGE_KEY, syncFieldVisits, () => router.refresh());
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
