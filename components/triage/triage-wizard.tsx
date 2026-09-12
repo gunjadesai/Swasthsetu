@@ -85,7 +85,11 @@ export function TriageWizard({ patientId }: { patientId?: number }) {
                 value={s.key}
                 className="mt-0.5 h-4 w-4 accent-teal-600"
               />
-              {locale === "hi" ? s.label_hi : s.label_en}
+              {locale === "hi"
+                ? s.label_hi
+                : locale === "mr"
+                  ? s.label_mr
+                  : s.label_en}
             </label>
           ))}
         </div>
