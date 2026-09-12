@@ -23,7 +23,7 @@ export async function acceptRequest(requestId: number) {
 
   const { error } = await supabase
     .from("ambulance_requests")
-    .update({ ambulance_id: ambulanceId, status: "Dispatched" })
+    .update({ ambulance_id: ambulanceId, status: "Dispatched", dispatched_at: new Date().toISOString() })
     .eq("request_id", requestId)
     .is("ambulance_id", null);
   if (error) throw new Error(error.message);

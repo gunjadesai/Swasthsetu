@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { decryptPHI } from "@/lib/phi-crypto";
+import { logPhiAccess } from "@/lib/audit";
 
 // Read-only, RLS-respecting FHIR R4-shaped export. This is NOT a
 // certified ABDM/ABHA integration (that needs an org registration this
@@ -9,7 +11,8 @@ import { createClient } from "@/lib/supabase/server";
 // allowed to read. Uses the normal cookie-scoped client (not the
 // service-role one), so a patient can only ever export their own
 // record and a doctor only a patient they've treated - RLS decides
-// that, not this route.
+// that, not this route. Clinical fields are decrypted for the export
+// and every export is written to the PHI audit log.
 export async function GET(
   _request: Request,
   { params }: { params: Promise<{ patientId: string }> }
@@ -37,6 +40,14 @@ export async function GET(
     // this user isn't allowed to see it - same response either way.
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
+
+  await logPhiAccess(supabase, {
+    profileId: user.id,
+    action: "export",
+    entityName: "patients",
+    entityId: patientId,
+    details: "FHIR summary bundle",
+  });
 
   const [{ data: records }, { data: prescriptions }] = await Promise.all([
     supabase
@@ -68,16 +79,20 @@ export async function GET(
           birthDate: patient.date_of_birth ?? undefined,
         },
       },
-      ...(records ?? []).map((r) => ({
-        resource: {
-          resourceType: "Condition",
-          id: String(r.record_id),
-          subject: { reference: `Patient/${patient.patient_id}` },
-          code: r.diagnosis ? { text: r.diagnosis } : undefined,
-          note: r.symptoms ? [{ text: r.symptoms }] : undefined,
-          recordedDate: r.created_at,
-        },
-      })),
+      ...(records ?? []).map((r) => {
+        const diagnosis = decryptPHI(r.diagnosis);
+        const symptoms = decryptPHI(r.symptoms);
+        return {
+          resource: {
+            resourceType: "Condition",
+            id: String(r.record_id),
+            subject: { reference: `Patient/${patient.patient_id}` },
+            code: diagnosis ? { text: diagnosis } : undefined,
+            note: symptoms ? [{ text: symptoms }] : undefined,
+            recordedDate: r.created_at,
+          },
+        };
+      }),
       ...(prescriptions ?? []).flatMap((p) =>
         (p.prescription_items ?? []).map((item, i) => ({
           resource: {

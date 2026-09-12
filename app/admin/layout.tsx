@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { Home, BookHeart, MessageSquareText } from "lucide-react";
+import { Home, BookHeart, MessageSquareText, HeartPulse } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { DashboardNav, type NavItem } from "@/components/nav/dashboard-nav";
 import { getDictionary } from "@/lib/i18n/get-dictionary";
@@ -23,6 +23,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
   const items: NavItem[] = [
     { href: "/admin/dashboard", label: t("nav.dashboard"), icon: <Home className="h-4 w-4" /> },
+    { href: "/admin/health-index", label: t("nav.healthIndex"), icon: <HeartPulse className="h-4 w-4" /> },
     { href: "/admin/schemes", label: t("nav.schemes"), icon: <BookHeart className="h-4 w-4" /> },
     { href: "/admin/feedback", label: t("nav.feedback"), icon: <MessageSquareText className="h-4 w-4" /> },
   ];
