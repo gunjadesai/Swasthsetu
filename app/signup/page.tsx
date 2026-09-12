@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState, type ChangeEvent } from "react";
 import Link from "next/link";
 import { signup, type SignupState } from "./actions";
 import { Button } from "@/components/ui/button";
@@ -19,8 +19,17 @@ const ROLE_OPTIONS = [
   { value: "AmbulanceProvider", label: "Ambulance Provider" },
 ] as const;
 
+type RoleValue = (typeof ROLE_OPTIONS)[number]["value"];
+
 export default function SignupPage() {
   const [state, formAction, pending] = useActionState(signup, initialState);
+  // React 19 resets uncontrolled fields after a form action, which wiped
+  // the whole form (and snapped the role back to Patient) whenever signup
+  // failed. Keep what was typed in state; the password still clears.
+  const [fields, setFields] = useState({ fullName: "", phone: "", email: "" });
+  const [role, setRole] = useState<RoleValue>(ROLE_OPTIONS[0].value);
+  const update = (key: keyof typeof fields) => (e: ChangeEvent<HTMLInputElement>) =>
+    setFields((prev) => ({ ...prev, [key]: e.target.value }));
 
   return (
     <main className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-6 py-16">
@@ -33,11 +42,28 @@ export default function SignupPage() {
       <form action={formAction} className="mt-8 space-y-5">
         <div>
           <Label htmlFor="fullName">Full name</Label>
-          <Input id="fullName" name="fullName" required placeholder="Asha Devi" />
+          <Input
+            id="fullName"
+            name="fullName"
+            required
+            autoComplete="name"
+            placeholder="Asha Devi"
+            value={fields.fullName}
+            onChange={update("fullName")}
+          />
         </div>
         <div>
           <Label htmlFor="phone">Phone number</Label>
-          <Input id="phone" name="phone" required placeholder="98765 43210" />
+          <Input
+            id="phone"
+            name="phone"
+            type="tel"
+            required
+            autoComplete="tel"
+            placeholder="98765 43210"
+            value={fields.phone}
+            onChange={update("phone")}
+          />
         </div>
         <div>
           <Label htmlFor="email">Email</Label>
@@ -46,7 +72,10 @@ export default function SignupPage() {
             name="email"
             type="email"
             required
+            autoComplete="email"
             placeholder="you@example.com"
+            value={fields.email}
+            onChange={update("email")}
           />
         </div>
         <div>
@@ -57,7 +86,9 @@ export default function SignupPage() {
             type="password"
             required
             minLength={8}
+            autoComplete="new-password"
             placeholder="At least 8 characters"
+            autoFocus={Boolean(state.error)}
           />
         </div>
 
@@ -66,7 +97,7 @@ export default function SignupPage() {
             I am a
           </legend>
           <div className="grid grid-cols-2 gap-2">
-            {ROLE_OPTIONS.map(({ value, label }, i) => (
+            {ROLE_OPTIONS.map(({ value, label }) => (
               <label
                 key={value}
                 className="flex items-center gap-2 text-sm text-ink"
@@ -75,7 +106,8 @@ export default function SignupPage() {
                   type="radio"
                   name="role"
                   value={value}
-                  defaultChecked={i === 0}
+                  checked={role === value}
+                  onChange={() => setRole(value)}
                   className="h-4 w-4 accent-teal-600"
                 />
                 {label}

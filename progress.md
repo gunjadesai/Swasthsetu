@@ -162,7 +162,7 @@ Services, Particularly in Rural and Underserved Areas."
 - New self-serve roles: ASHAWorker, HospitalStaff, LabStaff,
   PharmacyStaff, AmbulanceProvider (Administrator stays manual-promote
   only). `lib/types.ts` `RoleName`/`SelfServeRoleName`,
-  `middleware.ts`'s `ROLE_HOME` map, and `app/signup` all updated
+  `proxy.ts`'s (formerly `middleware.ts`) `ROLE_HOME` map, and `app/signup` all updated
   together.
 - Digital triage and walk-in queue management are new concepts not in
   the original schema - added via `triage_assessments` and

@@ -64,7 +64,7 @@ particularly in rural and underserved areas", Govt. of Maharashtra).
 ## What's built
 
 - **Auth & roles**: email/password auth, 8 roles, role-aware routing and
-  middleware protection, Hindi/English UI toggle.
+  route protection (`proxy.ts`), Hindi/English UI toggle.
 - **Patient**: dashboard, appointment booking, digital symptom triage,
   walk-in queue check-in/status, one-tap emergency ambulance request,
   bilingual health-scheme browser, medicine-availability search,
