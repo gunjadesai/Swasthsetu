@@ -3,6 +3,7 @@ import { format } from "date-fns";
 import { createClient } from "@/lib/supabase/server";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { getDictionary } from "@/lib/i18n/get-dictionary";
 
 export default async function DoctorAppointmentsPage() {
   const supabase = await createClient();
@@ -28,13 +29,15 @@ export default async function DoctorAppointmentsPage() {
     .order("appointment_date", { ascending: false })
     .order("appointment_time", { ascending: false });
 
+  const t = await getDictionary();
+
   return (
     <div className="max-w-4xl">
-      <h1 className="text-2xl font-semibold text-ink">Appointments</h1>
+      <h1 className="text-2xl font-semibold text-ink">{t("doctor.appointments.title")}</h1>
 
       {!appointments || appointments.length === 0 ? (
         <Card className="mt-6 flex flex-col items-center justify-center py-10 text-center">
-          <p className="text-sm text-ink/60">No appointments yet.</p>
+          <p className="text-sm text-ink/60">{t("doctor.appointments.empty")}</p>
         </Card>
       ) : (
         <div className="mt-6 space-y-3">
@@ -53,7 +56,7 @@ export default async function DoctorAppointmentsPage() {
                       {patient?.profiles?.full_name ?? "Patient"}
                     </p>
                     <p className="text-sm text-ink/60">
-                      {appt.mode === "Teleconsult" ? "Video consult" : "In person"}
+                      {appt.mode === "Teleconsult" ? t("dashboard.videoConsult") : t("dashboard.inPerson")}
                     </p>
                   </div>
                   <div className="text-right">

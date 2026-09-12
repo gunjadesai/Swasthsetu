@@ -3,6 +3,7 @@ import { CalendarClock } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { getDictionary, getLocale } from "@/lib/i18n/get-dictionary";
 
 export default async function DoctorDashboardPage() {
   const supabase = await createClient();
@@ -43,11 +44,15 @@ export default async function DoctorDashboardPage() {
         .eq("status", "Completed"),
     ]);
 
+  const t = await getDictionary();
+  const locale = await getLocale();
+  const todayLocale = locale === "hi" ? "hi-IN" : locale === "gu" ? "gu-IN" : "en-IN";
+
   return (
     <div className="max-w-4xl">
-      <h1 className="text-2xl font-semibold text-ink">Overview</h1>
+      <h1 className="text-2xl font-semibold text-ink">{t("dashboard.overview")}</h1>
       <p className="mt-1 text-sm text-ink/60">
-        Today, {new Date().toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long" })}
+        {new Date().toLocaleDateString(todayLocale, { weekday: "long", day: "numeric", month: "long" })}
       </p>
 
       <div className="mt-6 grid grid-cols-3 gap-4">
@@ -55,23 +60,23 @@ export default async function DoctorDashboardPage() {
           <p className="text-3xl font-semibold text-teal-600">
             {todayAppts?.length ?? 0}
           </p>
-          <p className="mt-1 text-sm text-ink/60">Appointments today</p>
+          <p className="mt-1 text-sm text-ink/60">{t("dashboard.appointmentsToday")}</p>
         </Card>
         <Card>
           <p className="text-3xl font-semibold text-teal-600">{totalCount ?? 0}</p>
-          <p className="mt-1 text-sm text-ink/60">Total appointments</p>
+          <p className="mt-1 text-sm text-ink/60">{t("dashboard.totalAppointments")}</p>
         </Card>
         <Card>
           <p className="text-3xl font-semibold text-teal-600">
             {completedCount ?? 0}
           </p>
-          <p className="mt-1 text-sm text-ink/60">Completed consultations</p>
+          <p className="mt-1 text-sm text-ink/60">{t("dashboard.completedConsultations")}</p>
         </Card>
       </div>
 
       <div className="mt-8">
         <h2 className="mb-3 text-lg font-semibold text-ink">
-          Today&apos;s schedule
+          {t("dashboard.todaysSchedule")}
         </h2>
 
         {todayAppts && todayAppts.length > 0 ? (
@@ -91,7 +96,7 @@ export default async function DoctorDashboardPage() {
                         {patient?.profiles?.full_name ?? "Patient"}
                       </p>
                       <p className="text-sm text-ink/60">
-                        {appt.mode === "Teleconsult" ? "Video consult" : "In person"}
+                        {appt.mode === "Teleconsult" ? t("dashboard.videoConsult") : t("dashboard.inPerson")}
                       </p>
                     </div>
                     <div className="text-right">
@@ -111,7 +116,7 @@ export default async function DoctorDashboardPage() {
           <Card className="flex flex-col items-center justify-center py-10 text-center">
             <CalendarClock className="h-8 w-8 text-ink/30" />
             <p className="mt-3 text-sm text-ink/60">
-              Nothing on your schedule today.
+              {t("dashboard.nothingOnSchedule")}
             </p>
           </Card>
         )}

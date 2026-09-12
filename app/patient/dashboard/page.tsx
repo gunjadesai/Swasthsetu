@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { getDictionary } from "@/lib/i18n/get-dictionary";
 
 export default async function PatientDashboardPage() {
   const supabase = await createClient();
@@ -48,17 +49,19 @@ export default async function PatientDashboardPage() {
         .eq("status", "Completed"),
     ]);
 
+  const t = await getDictionary();
+
   return (
     <div className="max-w-4xl">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-ink">Overview</h1>
+          <h1 className="text-2xl font-semibold text-ink">{t("dashboard.overview")}</h1>
           <p className="mt-1 text-sm text-ink/60">
-            Your appointments and health record, in one place.
+            {t("dashboard.patientSubtitle")}
           </p>
         </div>
         <Link href="/patient/appointments/book">
-          <Button>Book an appointment</Button>
+          <Button>{t("nav.book")}</Button>
         </Link>
       </div>
 
@@ -68,7 +71,7 @@ export default async function PatientDashboardPage() {
             <p className="text-3xl font-semibold text-teal-600">
               {totalCount ?? 0}
             </p>
-            <p className="mt-1 text-sm text-ink/60">Total appointments</p>
+            <p className="mt-1 text-sm text-ink/60">{t("dashboard.totalAppointments")}</p>
           </Card>
         </Link>
         <Link href="/patient/appointments?status=Completed">
@@ -76,7 +79,7 @@ export default async function PatientDashboardPage() {
             <p className="text-3xl font-semibold text-teal-600">
               {completedCount ?? 0}
             </p>
-            <p className="mt-1 text-sm text-ink/60">Completed consultations</p>
+            <p className="mt-1 text-sm text-ink/60">{t("dashboard.completedConsultations")}</p>
           </Card>
         </Link>
       </div>
@@ -84,13 +87,13 @@ export default async function PatientDashboardPage() {
       <div className="mt-8">
         <div className="mb-3 flex items-center justify-between">
           <h2 className="text-lg font-semibold text-ink">
-            Upcoming appointments
+            {t("dashboard.upcomingAppointments")}
           </h2>
           <Link
             href="/patient/appointments"
             className="flex items-center gap-1 text-sm font-medium text-teal-600"
           >
-            View all <ArrowRight className="h-3.5 w-3.5" />
+            {t("dashboard.viewAll")} <ArrowRight className="h-3.5 w-3.5" />
           </Link>
         </div>
 
@@ -131,10 +134,10 @@ export default async function PatientDashboardPage() {
           <Card className="flex flex-col items-center justify-center py-10 text-center">
             <Calendar className="h-8 w-8 text-ink/30" />
             <p className="mt-3 text-sm text-ink/60">
-              No upcoming appointments yet.
+              {t("dashboard.noUpcomingAppointments")}
             </p>
             <Link href="/patient/appointments/book" className="mt-3">
-              <Button size="sm">Book your first appointment</Button>
+              <Button size="sm">{t("dashboard.bookFirstAppointment")}</Button>
             </Link>
           </Card>
         )}
