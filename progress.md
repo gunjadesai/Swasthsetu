@@ -70,11 +70,58 @@ Services, Particularly in Rural and Underserved Areas."
   (server) / `useTranslation()` (client) + `LanguageSwitcher`. Covers
   nav, landing/auth, and the triage/emergency/schemes flows; not every
   string in the app yet.
-- **Digital triage** (`lib/triage.ts`) is a weighted symptom checklist,
-  not an ML model - deliberately, for auditability and because it's a
-  realistic 36-hour-build fit.
+- **Digital triage** is AI-first with a rule-based safety floor
+  (migration 003). `lib/ai-triage.ts` sends the checked symptoms plus the
+  person's own words (typed, spoken, SMS or phone-call transcript) to
+  Claude (`claude-opus-5`, structured output via `betaZodOutputFormat`,
+  server-side refusal `fallbacks: "default"`) and gets back urgency, next
+  action, likely minor causes, safe home-care advice and red flags in the
+  patient's language. The weighted checklist in `lib/triage.ts` (now with
+  en/hi/gu/Hinglish keywords) always runs too: final urgency is the higher
+  of the two, so rules can escalate the AI but never downgrade it. No API
+  key, a timeout or a refusal -> rules alone (`engine = 'Rules'`). Web
+  gets `effort: high`; SMS/IVR get `effort: low` with a 9s timeout
+  (Twilio drops webhooks at 15s); USSD is rules-only.
+- **Emergency redirect**: an Emergency triage result never renders a
+  result card - the server action `redirect()`s to `/patient/emergency`
+  (or the new `/asha/emergency`) with the triage attached, which shows why
+  it was flagged and what to do while waiting.
+- **Voice**: in the browser, Web Speech API (`lib/voice/use-speech.ts`,
+  en-IN/hi-IN/gu-IN) for symptom dictation, read-aloud results and a
+  hands-free voice SOS on the emergency page that sends the ambulance
+  request the moment it hears "help / bachao / ambulance" or an emergency
+  symptom. For keypad phones, a Twilio voice line (`/api/ivr/voice`,
+  `/api/ivr/gather`): press or say, AI triage of the spoken description,
+  ambulance on confirmation.
 - **Teleconsult**: embedded Jitsi (`meet.jit.si`) rooms, generated
-  per-appointment, no vendor key needed.
+  per-appointment, no vendor key needed. Appointments now have three
+  modes - InPerson, Teleconsult (video) and VoiceConsult (audio-only Jitsi
+  config for weak networks, plus a `tel:` fallback for the doctor).
+  `teleconsult_sessions` had no RLS policy before migration 003, so room
+  creation from a user session was blocked - fixed there.
+- **PHI encryption**: `lib/phi-crypto.ts`, AES-256-GCM with
+  `PHI_ENCRYPTION_KEY`, format `enc:v1:iv:tag:ciphertext`; values without
+  the prefix pass through as legacy plaintext. Encrypted: medical record
+  diagnosis/symptoms/notes, triage free text + AI assessment, patient
+  address + emergency contact, ambulance caller notes, SMS/IVR bodies.
+  Decrypt only on the server. PHI views/exports are written to
+  `audit_logs` (`lib/audit.ts`). A missing key blocks clinical writes with
+  a clear error - except ambulance requests, which drop the note instead.
+- **SMS / USSD / IVR for keypad phones**: `lib/telecom/`. Callers are
+  identified only by phone number (`profiles.phone_last10` generated
+  column). Webhooks verify `X-Twilio-Signature` or a shared
+  `TELECOM_WEBHOOK_SECRET` and return 503 when neither is configured.
+  Outbound via Twilio REST when `SMS_PROVIDER=twilio`, otherwise
+  simulated and logged as such. Every message is logged to `sms_messages`
+  (encrypted body). Ambulance requests from any channel SMS the patient's
+  emergency contact. Indian A2P SMS additionally needs DLT templates - a
+  DLT gateway (MSG91/Gupshup/Exotel) slots in next to `sendViaTwilio`.
+- **Public Health Index**: `lib/health-index.ts` - six 0-100 district
+  indicators (emergency response, appointment completion, referral
+  follow-through, vaccination coverage, medicine availability, patient
+  satisfaction) over 90 days, composite = mean of indicators with >= 5
+  records. Admin view at `/admin/health-index`; open JSON feed at
+  `/api/public-health-index` with small-cell (<5) suppression.
 - **Interoperability**: `/api/fhir/patient/[patientId]/summary` returns
   a FHIR R4-shaped Bundle built from existing tables, RLS-respecting.
   Not a certified ABDM/ABHA integration (needs an org registration this
@@ -115,7 +162,7 @@ Services, Particularly in Rural and Underserved Areas."
 - New self-serve roles: ASHAWorker, HospitalStaff, LabStaff,
   PharmacyStaff, AmbulanceProvider (Administrator stays manual-promote
   only). `lib/types.ts` `RoleName`/`SelfServeRoleName`,
-  `middleware.ts`'s `ROLE_HOME` map, and `app/signup` all updated
+  `proxy.ts`'s (formerly `middleware.ts`) `ROLE_HOME` map, and `app/signup` all updated
   together.
 - Digital triage and walk-in queue management are new concepts not in
   the original schema - added via `triage_assessments` and
@@ -137,6 +184,11 @@ Services, Particularly in Rural and Underserved Areas."
 | `CLOUDINARY_CLOUD_NAME`                | ❌ still needed - blocks image upload until provided |
 | `CLOUDINARY_API_KEY`                   | ✅ have it (server-only)         |
 | `CLOUDINARY_API_SECRET`                | ✅ have it (server-only)         |
+| `PHI_ENCRYPTION_KEY`                   | ❌ **required** (migration 003) - clinical writes fail with a clear error until set |
+| `ANTHROPIC_API_KEY`                    | ❌ needed for AI triage - rule-based fallback until set |
+| `SMS_PROVIDER` + `TWILIO_*`            | ❌ optional - SMS/voice calls are simulated until set |
+| `TELECOM_WEBHOOK_SECRET` / `PUBLIC_APP_URL` | ❌ needed before exposing `/api/sms`, `/api/ussd`, `/api/ivr` |
+| `CRON_SECRET`                          | ❌ recommended - protects `/api/reminders/dispatch` |
 
 ## 6. Phase Roadmap
 
@@ -193,6 +245,21 @@ Services, Particularly in Rural and Underserved Areas."
   embedded-Jitsi teleconsult (patient + doctor sides), FHIR-shaped
   health-record export. Accessibility pass and deployment hardening are
   still outstanding.
+
+- [x] **Phase 7 — AI triage, voice, keypad-phone channels, PHI security,
+  Public Health Index** (`supabase/migrations/003_ai_triage_voice_sms_phi.sql`)
+  Claude-powered symptom triage with a rule-based safety floor; Emergency
+  results redirect straight to the emergency page (patient and new ASHA
+  page). Browser voice: dictation, read-aloud, hands-free voice SOS.
+  Keypad phones: SMS commands (`/api/sms/inbound`), USSD menu
+  (`/api/ussd`), IVR voice line with spoken AI triage (`/api/ivr/*`),
+  SMS/voice-call reminders, emergency-contact SMS on every ambulance
+  request. Voice consult (audio-only) alongside video consult at booking.
+  AES-256-GCM PHI encryption + PHI access audit log. District Public
+  Health Index (admin page + suppressed public JSON feed).
+  **Status: code complete and type-checks; not yet run against a live
+  Supabase project with migration 003, real Anthropic key, or a Twilio
+  number.**
 
 ## 7. Open Questions
 

@@ -5,6 +5,8 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { TeleconsultRoom } from "@/components/teleconsult-room";
+import { consultModeLabel, isRemoteConsult } from "@/lib/consult-mode";
+import { decryptPHI } from "@/lib/phi-crypto";
 import { cn } from "@/lib/utils";
 import { CancelAppointmentButton } from "./cancel-button";
 
@@ -80,9 +82,16 @@ export default async function PatientAppointmentsPage({
       .eq("patient_id", patient.patient_id),
   ]);
 
+  // Diagnosis and notes are stored encrypted (lib/phi-crypto.ts).
   const recordByAppointment = new Map<number, RecordWithPrescription>();
   (records ?? []).forEach((r) => {
-    if (r.appointment_id) recordByAppointment.set(r.appointment_id, r);
+    if (r.appointment_id) {
+      recordByAppointment.set(r.appointment_id, {
+        ...r,
+        diagnosis: decryptPHI(r.diagnosis),
+        notes: decryptPHI(r.notes),
+      });
+    }
   });
 
   return (
@@ -139,7 +148,7 @@ export default async function PatientAppointmentsPage({
                     </p>
                     <p className="text-sm text-ink/70">
                       {doctor?.specialization ?? "General"} ·{" "}
-                      {appt.mode === "Teleconsult" ? "Video consult" : "In person"}
+                      {consultModeLabel(appt.mode)}
                     </p>
                   </div>
                   <div className="text-right">
@@ -158,9 +167,12 @@ export default async function PatientAppointmentsPage({
                   </div>
                 </div>
 
-                {appt.status === "Scheduled" && appt.mode === "Teleconsult" && (
+                {appt.status === "Scheduled" && isRemoteConsult(appt.mode) && (
                   <div className="mt-4 border-t border-line pt-4">
-                    <TeleconsultRoom appointmentId={appt.appointment_id} />
+                    <TeleconsultRoom
+                      appointmentId={appt.appointment_id}
+                      mode={appt.mode === "VoiceConsult" ? "voice" : "video"}
+                    />
                   </div>
                 )}
 

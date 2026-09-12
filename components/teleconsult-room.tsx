@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Video, X } from "lucide-react";
+import { Phone, Video, X } from "lucide-react";
 import {
   getOrCreateTeleconsultRoom,
   markTeleconsultJoined,
@@ -51,7 +51,7 @@ function loadJitsiScript(): Promise<void> {
       script.onload = () => resolve();
       script.onerror = () => {
         jitsiScriptPromise = null;
-        reject(new Error("Could not load the video call library."));
+        reject(new Error("Could not load the call library."));
       };
       document.head.appendChild(script);
     });
@@ -63,7 +63,26 @@ function roomNameFromLink(meetingLink: string): string {
   return meetingLink.split("/").pop() ?? meetingLink;
 }
 
-export function TeleconsultRoom({ appointmentId }: { appointmentId: number }) {
+// Voice consults use the same Jitsi room, started audio-only with the
+// camera off and video controls removed - a fraction of the bandwidth,
+// so it holds up on 2G/weak 3G where video would freeze.
+const VOICE_CONFIG = {
+  prejoinPageEnabled: false,
+  startAudioOnly: true,
+  startWithVideoMuted: true,
+  disableVideoQualityLabel: true,
+  toolbarButtons: ["microphone", "hangup", "chat", "raisehand", "settings"],
+};
+
+export function TeleconsultRoom({
+  appointmentId,
+  mode = "video",
+}: {
+  appointmentId: number;
+  mode?: "video" | "voice";
+}) {
+  const voice = mode === "voice";
+  const height = voice ? 220 : 480;
   const [roomName, setRoomName] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -92,8 +111,8 @@ export function TeleconsultRoom({ appointmentId }: { appointmentId: number }) {
       roomName,
       parentNode: containerRef.current,
       width: "100%",
-      height: 480,
-      configOverwrite: { prejoinPageEnabled: false },
+      height,
+      configOverwrite: voice ? VOICE_CONFIG : { prejoinPageEnabled: false },
       interfaceConfigOverwrite: { TOOLBAR_ALWAYS_VISIBLE: true },
     });
     apiRef.current = api;
@@ -115,19 +134,19 @@ export function TeleconsultRoom({ appointmentId }: { appointmentId: number }) {
     setLoading(true);
     setError(null);
     try {
-      const result = await getOrCreateTeleconsultRoom(appointmentId);
+      const result = await getOrCreateTeleconsultRoom(appointmentId, voice ? "Voice" : "Video");
       if (result.error) {
         setError(result.error);
         return;
       }
       await loadJitsiScript();
       if (!window.JitsiMeetExternalAPI) {
-        throw new Error("Video call library did not load.");
+        throw new Error("Call library did not load.");
       }
       await markTeleconsultJoined(appointmentId);
       setRoomName(roomNameFromLink(result.meetingLink));
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Could not start the video call.");
+      setError(e instanceof Error ? e.message : "Could not start the call.");
     } finally {
       setLoading(false);
     }
@@ -137,21 +156,26 @@ export function TeleconsultRoom({ appointmentId }: { appointmentId: number }) {
     return (
       <div className="rounded-lg border border-line bg-white p-4">
         <Button onClick={handleJoin} disabled={loading} className="gap-2">
-          <Video className="h-4 w-4" />
-          {loading ? "Starting..." : "Join video consult"}
+          {voice ? <Phone className="h-4 w-4" /> : <Video className="h-4 w-4" />}
+          {loading ? "Starting..." : voice ? "Join voice consult" : "Join video consult"}
         </Button>
+        {voice && (
+          <p className="mt-2 text-xs text-ink/70">
+            Audio only - works on a weak network. Keep this page open during the call.
+          </p>
+        )}
         {error && <p className="mt-2 text-sm text-danger">{error}</p>}
       </div>
     );
   }
 
   return (
-    <div className="relative overflow-hidden rounded-lg border border-line" style={{ height: 480 }}>
+    <div className="relative overflow-hidden rounded-lg border border-line" style={{ height }}>
       <button
         type="button"
         onClick={closeRoom}
-        aria-label="Leave video call"
-        title="Leave video call"
+        aria-label="Leave call"
+        title="Leave call"
         className="absolute right-2 top-2 z-10 rounded-full bg-black/60 p-1.5 text-white hover:bg-black/80"
       >
         <X className="h-4 w-4" />

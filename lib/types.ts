@@ -38,6 +38,7 @@ export type Doctor = {
   supports_teleconsult: boolean;
 };
 
+// address and emergency_contact are PHI-encrypted at rest (migration 003).
 export type Patient = {
   patient_id: number;
   profile_id: string;
@@ -61,7 +62,7 @@ export type Appointment = {
   doctor_id: number;
   appointment_date: string;
   appointment_time: string;
-  mode: "InPerson" | "Teleconsult";
+  mode: "InPerson" | "Teleconsult" | "VoiceConsult";
   status: AppointmentStatus;
   created_at: string;
 };
@@ -75,6 +76,7 @@ export type DoctorAvailability = {
   slot_duration_minutes: number;
 };
 
+// diagnosis, symptoms and notes are PHI-encrypted at rest (migration 003).
 export type MedicalRecord = {
   record_id: number;
   patient_id: number;
@@ -114,6 +116,13 @@ export type RecommendedAction =
   | "Teleconsult"
   | "CallAmbulance";
 
+// Where a triage / ambulance request came from (migration 003).
+export type TriageChannel = "Web" | "Voice" | "SMS" | "USSD" | "IVR";
+
+// Which engine produced the final triage result. "AI+Rules" = the AI's
+// urgency was raised by a rule-based red flag.
+export type TriageEngine = "Rules" | "AI" | "AI+Rules";
+
 export type TriageAssessment = {
   triage_id: number;
   patient_id: number;
@@ -124,6 +133,10 @@ export type TriageAssessment = {
   notes: string | null;
   linked_appointment_id: number | null;
   linked_ambulance_request_id: number | null;
+  channel: TriageChannel;
+  engine: TriageEngine;
+  free_text: string | null; // PHI-encrypted
+  ai_assessment: string | null; // PHI-encrypted JSON
   created_at: string;
 };
 
@@ -197,7 +210,10 @@ export type AmbulanceRequest = {
   destination_hospital_id: number | null;
   status: AmbulanceRequestStatus;
   triage_id: number | null;
+  channel: TriageChannel;
+  caller_notes: string | null; // PHI-encrypted
   requested_at: string;
+  dispatched_at: string | null;
   completed_at: string | null;
 };
 
@@ -233,6 +249,22 @@ export type Reminder = {
   scheduled_for: string;
   channel: "SMS" | "IVR" | "App";
   status: "Pending" | "Sent" | "Failed";
+  last_error: string | null;
+  provider_message_id: string | null;
+};
+
+export type SmsMessage = {
+  message_id: number;
+  direction: "Inbound" | "Outbound";
+  channel: "SMS" | "USSD" | "IVR";
+  phone_number: string;
+  profile_id: string | null;
+  body: string; // PHI-encrypted
+  provider: string | null;
+  provider_message_id: string | null;
+  status: "Received" | "Sent" | "Simulated" | "Failed";
+  error: string | null;
+  created_at: string;
 };
 
 export type LabTestOrder = {

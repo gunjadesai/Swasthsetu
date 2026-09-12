@@ -3,6 +3,7 @@
 import { randomUUID } from "crypto";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { encryptPHI } from "@/lib/phi-crypto";
 
 export type RegisterPatientState = { error?: string; success?: boolean };
 
@@ -11,9 +12,10 @@ export type RegisterPatientState = { error?: string; success?: boolean };
 // a unique identifier per user, so a placeholder email is synthesized
 // from the phone number and a random password is generated - the
 // patient signs in later via a "forgot password" reset once they have
-// a device, or stays ASHA-mediated indefinitely. Documented prototype
-// simplification, same spirit as the existing "Confirm email off" one
-// in progress.md.
+// a device, or stays ASHA-mediated indefinitely (and can use the SMS,
+// USSD and IVR lines from a keypad phone, matched by this phone number).
+// Documented prototype simplification, same spirit as the existing
+// "Confirm email off" one in progress.md.
 export async function registerAssistedPatient(
   _prevState: RegisterPatientState,
   formData: FormData
@@ -27,6 +29,17 @@ export async function registerAssistedPatient(
 
   if (!fullName || !phone) {
     return { error: "Full name and phone number are required." };
+  }
+
+  // Encrypt before creating anything, so a missing key can't leave a
+  // half-registered account behind.
+  let encryptedAddress: string | null;
+  let encryptedEmergencyContact: string | null;
+  try {
+    encryptedAddress = encryptPHI(address);
+    encryptedEmergencyContact = encryptPHI(emergencyContact);
+  } catch (e) {
+    return { error: e instanceof Error ? e.message : "Could not secure the patient's details." };
   }
 
   const supabase = await createClient();
@@ -82,8 +95,8 @@ export async function registerAssistedPatient(
     profile_id: created.user.id,
     date_of_birth: dateOfBirth || null,
     gender: gender || null,
-    address: address || null,
-    emergency_contact: emergencyContact || null,
+    address: encryptedAddress,
+    emergency_contact: encryptedEmergencyContact,
     registered_by_asha_id: asha.asha_id,
   });
   if (patientError) return { error: patientError.message };

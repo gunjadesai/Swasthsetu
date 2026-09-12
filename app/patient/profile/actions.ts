@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
+import { encryptPHI } from "@/lib/phi-crypto";
 
 const schema = z.object({
   fullName: z.string().min(2, "Enter your full name"),
@@ -50,6 +51,16 @@ export async function updatePatientProfile(
     emergencyContact,
   } = parsed.data;
 
+  // Address and emergency contact are PHI - stored encrypted.
+  let encryptedAddress: string | null;
+  let encryptedEmergencyContact: string | null;
+  try {
+    encryptedAddress = encryptPHI(address);
+    encryptedEmergencyContact = encryptPHI(emergencyContact);
+  } catch (e) {
+    return { error: e instanceof Error ? e.message : "Could not secure your details." };
+  }
+
   const [{ error: profileError }, { error: patientError }] = await Promise.all([
     supabase
       .from("profiles")
@@ -61,8 +72,8 @@ export async function updatePatientProfile(
         date_of_birth: dateOfBirth ?? null,
         gender: gender ?? null,
         blood_group: bloodGroup ?? null,
-        address: address ?? null,
-        emergency_contact: emergencyContact ?? null,
+        address: encryptedAddress,
+        emergency_contact: encryptedEmergencyContact,
       })
       .eq("profile_id", user.id),
   ]);

@@ -11,6 +11,10 @@ const initialState: LoginState = {};
 
 export default function LoginPage() {
   const [state, formAction, pending] = useActionState(login, initialState);
+  // React 19 resets uncontrolled fields after a form action, which wiped
+  // the email on every failed sign-in. Holding it in state keeps it; the
+  // password still clears after a failed attempt, as it should.
+  const [email, setEmail] = useState("");
 
   // Signing in inherently needs the network (Supabase auth has to be
   // reached) - it can't be made to "work offline" like the ASHA
@@ -49,12 +53,22 @@ export default function LoginPage() {
             name="email"
             type="email"
             required
+            autoComplete="email"
             placeholder="you@example.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
           />
         </div>
         <div>
           <Label htmlFor="password">Password</Label>
-          <Input id="password" name="password" type="password" required />
+          <Input
+            id="password"
+            name="password"
+            type="password"
+            required
+            autoComplete="current-password"
+            autoFocus={Boolean(state.error)}
+          />
         </div>
 
         {errorToShow && (

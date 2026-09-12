@@ -1,33 +1,71 @@
 "use client";
 
 import { useActionState, useEffect, useState, useTransition } from "react";
+import { Building2, Phone, Video, type LucideIcon } from "lucide-react";
 import { bookAppointment, getAvailableSlots, type BookState } from "./actions";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input, Select } from "@/components/ui/input";
+import { CONSULT_MODE_LABEL, isRemoteConsult, type ConsultMode } from "@/lib/consult-mode";
 import { cn } from "@/lib/utils";
 
 type DoctorOption = {
   doctor_id: number;
   full_name: string;
   specialization: string | null;
+  supports_teleconsult: boolean;
 };
+
+const MODE_OPTIONS: { mode: ConsultMode; icon: LucideIcon; description: string }[] = [
+  {
+    mode: "InPerson",
+    icon: Building2,
+    description: "Visit the doctor at the clinic or PHC.",
+  },
+  {
+    mode: "Teleconsult",
+    icon: Video,
+    description: "Video call from a smartphone. Needs a steady internet connection.",
+  },
+  {
+    mode: "VoiceConsult",
+    icon: Phone,
+    description: "Audio-only call. Works on a weak network, and the doctor can also ring a keypad phone.",
+  },
+];
 
 const initialState: BookState = {};
 
-export function BookingForm({ doctors }: { doctors: DoctorOption[] }) {
+export function BookingForm({
+  doctors,
+  initialMode = "InPerson",
+}: {
+  doctors: DoctorOption[];
+  initialMode?: ConsultMode;
+}) {
   const [state, formAction, pending] = useActionState(
     bookAppointment,
     initialState
   );
+  const [mode, setMode] = useState<ConsultMode>(initialMode);
   const [doctorId, setDoctorId] = useState("");
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
-  const [mode, setMode] = useState<"InPerson" | "Teleconsult">("InPerson");
   const [slots, setSlots] = useState<string[]>([]);
   const [loadingSlots, startSlotsTransition] = useTransition();
 
   const today = new Date().toISOString().slice(0, 10);
+  const availableDoctors = isRemoteConsult(mode)
+    ? doctors.filter((d) => d.supports_teleconsult)
+    : doctors;
+
+  // Switching to a remote mode can hide the doctor already picked.
+  useEffect(() => {
+    if (doctorId && !availableDoctors.some((d) => String(d.doctor_id) === doctorId)) {
+      setDoctorId("");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mode]);
 
   useEffect(() => {
     setTime("");
@@ -43,6 +81,39 @@ export function BookingForm({ doctors }: { doctors: DoctorOption[] }) {
 
   return (
     <form action={formAction} className="mt-6 max-w-lg space-y-5">
+      <fieldset>
+        <legend className="mb-1.5 text-sm font-medium text-ink">
+          Consultation type
+        </legend>
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+          {MODE_OPTIONS.map(({ mode: option, icon: Icon, description }) => (
+            <label
+              key={option}
+              className={cn(
+                "flex cursor-pointer flex-col gap-1 rounded-md border p-3 text-sm transition-colors",
+                mode === option
+                  ? "border-teal-600 bg-teal-50"
+                  : "border-line bg-white hover:border-teal-500"
+              )}
+            >
+              <span className="flex items-center gap-2 font-medium text-ink">
+                <input
+                  type="radio"
+                  name="mode"
+                  value={option}
+                  checked={mode === option}
+                  onChange={() => setMode(option)}
+                  className="h-4 w-4 accent-teal-600"
+                />
+                <Icon className="h-4 w-4 text-teal-600" />
+                {CONSULT_MODE_LABEL[option]}
+              </span>
+              <span className="text-xs text-ink/70">{description}</span>
+            </label>
+          ))}
+        </div>
+      </fieldset>
+
       <div>
         <Label htmlFor="doctorId">Doctor</Label>
         <Select
@@ -55,13 +126,18 @@ export function BookingForm({ doctors }: { doctors: DoctorOption[] }) {
           <option value="" disabled>
             Choose a doctor
           </option>
-          {doctors.map((d) => (
+          {availableDoctors.map((d) => (
             <option key={d.doctor_id} value={d.doctor_id}>
               Dr. {d.full_name}
               {d.specialization ? ` - ${d.specialization}` : ""}
             </option>
           ))}
         </Select>
+        {isRemoteConsult(mode) && availableDoctors.length === 0 && (
+          <p className="mt-1 text-xs text-ink/70">
+            No doctors offer remote consultations yet - choose In person.
+          </p>
+        )}
       </div>
 
       <div>
@@ -109,36 +185,6 @@ export function BookingForm({ doctors }: { doctors: DoctorOption[] }) {
       )}
       <input type="hidden" name="time" value={time} />
 
-      <fieldset>
-        <legend className="mb-1.5 text-sm font-medium text-ink">
-          Visit type
-        </legend>
-        <div className="flex gap-4">
-          <label className="flex items-center gap-2 text-sm text-ink">
-            <input
-              type="radio"
-              name="mode"
-              value="InPerson"
-              checked={mode === "InPerson"}
-              onChange={() => setMode("InPerson")}
-              className="h-4 w-4 accent-teal-600"
-            />
-            In person
-          </label>
-          <label className="flex items-center gap-2 text-sm text-ink">
-            <input
-              type="radio"
-              name="mode"
-              value="Teleconsult"
-              checked={mode === "Teleconsult"}
-              onChange={() => setMode("Teleconsult")}
-              className="h-4 w-4 accent-teal-600"
-            />
-            Video consult
-          </label>
-        </div>
-      </fieldset>
-
       {state.error && (
         <p
           role="alert"
@@ -149,7 +195,7 @@ export function BookingForm({ doctors }: { doctors: DoctorOption[] }) {
       )}
 
       <Button type="submit" disabled={pending || !time}>
-        {pending ? "Booking..." : "Confirm appointment"}
+        {pending ? "Booking..." : `Confirm ${CONSULT_MODE_LABEL[mode].toLowerCase()}`}
       </Button>
     </form>
   );

@@ -96,7 +96,7 @@ export default async function DoctorDashboardPage() {
                         {patient?.profiles?.full_name ?? "Patient"}
                       </p>
                       <p className="text-sm text-ink/70">
-                        {appt.mode === "Teleconsult" ? t("dashboard.videoConsult") : t("dashboard.inPerson")}
+                        {appt.mode === "Teleconsult" ? t("dashboard.videoConsult") : appt.mode === "VoiceConsult" ? t("dashboard.voiceConsult") : t("dashboard.inPerson")}
                       </p>
                     </div>
                     <div className="text-right">

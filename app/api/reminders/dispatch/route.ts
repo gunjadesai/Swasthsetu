@@ -1,47 +1,95 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { defaultLocale, locales, type Locale } from "@/lib/i18n/dictionaries";
+import { placeVoiceCall, sendSms, type SmsSendResult } from "@/lib/telecom/sms";
+import { say, twimlDocument } from "@/lib/telecom/twiml";
 
 // System job, no end-user session - hence the service-role client (see
 // lib/supabase/admin.ts). Call this from a cron trigger (Vercel Cron,
-// Supabase scheduled function, or just manually while testing).
+// Supabase scheduled function, or just manually while testing). When
+// CRON_SECRET is set, the caller must send `Authorization: Bearer <secret>`.
 //
-// 'App' reminders are genuinely delivered - the notification bell
-// reads reminders where status = 'Sent', so marking them Sent here IS
-// the delivery. 'SMS'/'IVR' reminders are marked Failed with an
-// explicit reason: this prototype has no Twilio/MSG91 (or similar)
-// credentials, the same category of gap as the already-flagged
-// missing CLOUDINARY_CLOUD_NAME in progress.md - wiring a real
-// provider in is future work, not a silent no-op.
-export async function POST() {
+// 'App' reminders are delivered by marking them Sent - the notification
+// bell reads reminders where status = 'Sent'.
+// 'SMS' reminders go out through lib/telecom/sms.ts; 'IVR' reminders place
+// a voice call that reads the message aloud in the patient's language,
+// for people who can't read a text. Without SMS_PROVIDER=twilio both are
+// only simulated, and the row is marked Failed with that reason - never
+// silently Sent.
+export async function POST(request: Request) {
+  const cronSecret = process.env.CRON_SECRET;
+  if (cronSecret && request.headers.get("authorization") !== `Bearer ${cronSecret}`) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   const admin = createAdminClient();
   const nowIso = new Date().toISOString();
 
   const { data: due, error } = await admin
     .from("reminders")
-    .select("reminder_id, channel")
+    .select("reminder_id, channel, message, patients(profiles(id, phone_number, languages(language_code)))")
     .eq("status", "Pending")
-    .lte("scheduled_for", nowIso);
+    .lte("scheduled_for", nowIso)
+    .order("scheduled_for", { ascending: true })
+    .limit(50);
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  const appIds = (due ?? []).filter((r) => r.channel === "App").map((r) => r.reminder_id);
-  const telecomIds = (due ?? []).filter((r) => r.channel !== "App").map((r) => r.reminder_id);
-
+  const rows = due ?? [];
+  const appIds = rows.filter((r) => r.channel === "App").map((r) => r.reminder_id);
   if (appIds.length > 0) {
     await admin.from("reminders").update({ status: "Sent" }).in("reminder_id", appIds);
   }
-  if (telecomIds.length > 0) {
-    await admin.from("reminders").update({ status: "Failed" }).in("reminder_id", telecomIds);
+
+  const summary = {
+    dispatchedInApp: appIds.length,
+    sms: { sent: 0, simulated: 0, failed: 0 },
+    ivr: { sent: 0, simulated: 0, failed: 0 },
+  };
+
+  for (const reminder of rows.filter((r) => r.channel !== "App")) {
+    const profile =
+      (
+        reminder.patients as unknown as {
+          profiles: { id: string; phone_number: string | null; languages: { language_code: string } | null } | null;
+        } | null
+      )?.profiles ?? null;
+    const code = profile?.languages?.language_code as Locale | undefined;
+    const locale = code && locales.includes(code) ? code : defaultLocale;
+    const meta = { profileId: profile?.id, relatedTable: "reminders", relatedId: reminder.reminder_id };
+
+    let result: SmsSendResult;
+    if (!profile?.phone_number) {
+      result = { status: "Failed", error: "Patient has no phone number on file." };
+    } else if (reminder.channel === "SMS") {
+      result = await sendSms(profile.phone_number, reminder.message, meta);
+    } else {
+      // Said twice: people often miss the start while lifting the phone.
+      const twiml = twimlDocument(say(reminder.message, locale), '<Pause length="1"/>', say(reminder.message, locale));
+      result = await placeVoiceCall(profile.phone_number, twiml, reminder.message, meta);
+    }
+
+    const bucket = reminder.channel === "SMS" ? summary.sms : summary.ivr;
+    if (result.status === "Sent") bucket.sent++;
+    else if (result.status === "Simulated") bucket.simulated++;
+    else bucket.failed++;
+
+    await admin
+      .from("reminders")
+      .update({
+        status: result.status === "Sent" ? "Sent" : "Failed",
+        last_error:
+          result.status === "Sent"
+            ? null
+            : result.status === "Simulated"
+              ? "Simulated only - set SMS_PROVIDER=twilio to deliver for real."
+              : (result.error ?? "Delivery failed."),
+        provider_message_id: result.providerMessageId ?? null,
+      })
+      .eq("reminder_id", reminder.reminder_id);
   }
 
-  return NextResponse.json({
-    dispatchedInApp: appIds.length,
-    failedNoProvider: telecomIds.length,
-    note:
-      telecomIds.length > 0
-        ? "SMS/IVR reminders need a telecom provider key (e.g. Twilio, MSG91) that isn't configured yet."
-        : undefined,
-  });
+  return NextResponse.json(summary);
 }
