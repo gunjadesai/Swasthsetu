@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { getDictionary } from "@/lib/i18n/get-dictionary";
 
 async function count(
   supabase: Awaited<ReturnType<typeof createClient>>,
@@ -34,18 +35,20 @@ export default async function AdminDashboardPage() {
     count(supabase, "patients"),
   ]);
 
+  const t = await getDictionary();
+
   const stats = [
-    { label: "Total appointments", value: appointments },
-    { label: "Pending referrals", value: pendingReferrals },
-    { label: "Open ambulance requests", value: openAmbulanceRequests },
-    { label: "Open feedback", value: openFeedback },
-    { label: "ASHA workers onboarded", value: ashaWorkers },
-    { label: "Registered patients", value: registeredPatients },
+    { label: t("admin.dashboard.totalAppointments"), value: appointments },
+    { label: t("admin.dashboard.pendingReferrals"), value: pendingReferrals },
+    { label: t("admin.dashboard.openAmbulanceRequests"), value: openAmbulanceRequests },
+    { label: t("admin.dashboard.openFeedback"), value: openFeedback },
+    { label: t("admin.dashboard.ashaWorkersOnboarded"), value: ashaWorkers },
+    { label: t("admin.dashboard.registeredPatients"), value: registeredPatients },
   ];
 
   return (
     <div>
-      <h1 className="text-2xl font-semibold text-ink">District overview</h1>
+      <h1 className="text-2xl font-semibold text-ink">{t("admin.dashboard.title")}</h1>
       <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {stats.map((s) => (
           <div key={s.label} className="rounded-lg border border-line bg-white p-5">

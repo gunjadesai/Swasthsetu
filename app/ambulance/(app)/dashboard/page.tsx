@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { getDictionary } from "@/lib/i18n/get-dictionary";
 import { RequestBoard } from "./request-board";
 
 export default async function AmbulanceDashboardPage() {
@@ -30,9 +31,11 @@ export default async function AmbulanceDashboardPage() {
     mine: false,
   });
 
+  const t = await getDictionary();
+
   return (
     <div className="max-w-2xl">
-      <h1 className="text-2xl font-semibold text-ink">Ambulance requests</h1>
+      <h1 className="text-2xl font-semibold text-ink">{t("ambulance.dashboard.title")}</h1>
       <div className="mt-6">
         <RequestBoard
           ambulanceId={ambulance?.ambulance_id ?? 0}

@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { getDictionary } from "@/lib/i18n/get-dictionary";
 
 export default async function HospitalDashboardPage() {
   const supabase = await createClient();
@@ -34,21 +35,22 @@ export default async function HospitalDashboardPage() {
     .eq("status", "Open");
 
   const hospitalName = (staff?.hospitals as unknown as { name?: string } | null)?.name;
+  const t = await getDictionary();
 
   return (
     <div>
-      <h1 className="text-2xl font-semibold text-ink">{hospitalName ?? "Hospital overview"}</h1>
+      <h1 className="text-2xl font-semibold text-ink">{hospitalName ?? t("hospital.dashboard.overview")}</h1>
       <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div className="rounded-lg border border-line bg-white p-5">
-          <p className="text-sm text-ink/60">Waiting in queue today</p>
+          <p className="text-sm text-ink/60">{t("hospital.dashboard.waitingToday")}</p>
           <p className="mt-1 text-3xl font-bold text-teal-600">{waitingCount ?? 0}</p>
         </div>
         <div className="rounded-lg border border-line bg-white p-5">
-          <p className="text-sm text-ink/60">Pending referrals in</p>
+          <p className="text-sm text-ink/60">{t("hospital.dashboard.pendingReferrals")}</p>
           <p className="mt-1 text-3xl font-bold text-teal-600">{pendingReferrals ?? 0}</p>
         </div>
         <div className="rounded-lg border border-line bg-white p-5">
-          <p className="text-sm text-ink/60">Open feedback</p>
+          <p className="text-sm text-ink/60">{t("hospital.dashboard.openFeedback")}</p>
           <p className="mt-1 text-3xl font-bold text-teal-600">{openFeedback ?? 0}</p>
         </div>
       </div>

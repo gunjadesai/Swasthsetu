@@ -122,6 +122,28 @@ export const dictionaries = {
     "queue.waiting": "Waiting",
     "queue.called": "You're being called - please go to the counter",
 
+    "asha.dashboard.overview": "ASHA overview",
+    "asha.dashboard.patientsRegistered": "Patients you've registered",
+    "asha.dashboard.visitsLogged": "Field visits logged",
+
+    "hospital.dashboard.overview": "Hospital overview",
+    "hospital.dashboard.waitingToday": "Waiting in queue today",
+    "hospital.dashboard.pendingReferrals": "Pending referrals in",
+    "hospital.dashboard.openFeedback": "Open feedback",
+
+    "lab.dashboard.title": "Lab orders",
+    "lab.dashboard.noPendingOrders": "No pending orders.",
+
+    "ambulance.dashboard.title": "Ambulance requests",
+
+    "admin.dashboard.title": "District overview",
+    "admin.dashboard.totalAppointments": "Total appointments",
+    "admin.dashboard.pendingReferrals": "Pending referrals",
+    "admin.dashboard.openAmbulanceRequests": "Open ambulance requests",
+    "admin.dashboard.openFeedback": "Open feedback",
+    "admin.dashboard.ashaWorkersOnboarded": "ASHA workers onboarded",
+    "admin.dashboard.registeredPatients": "Registered patients",
+
     "common.save": "Save",
     "common.cancel": "Cancel",
     "common.submit": "Submit",
@@ -233,6 +255,28 @@ export const dictionaries = {
     "queue.yourToken": "आपका टोकन नंबर",
     "queue.waiting": "प्रतीक्षा में",
     "queue.called": "आपको बुलाया जा रहा है - कृपया काउंटर पर जाएं",
+
+    "asha.dashboard.overview": "आशा अवलोकन",
+    "asha.dashboard.patientsRegistered": "आपके द्वारा पंजीकृत मरीज़",
+    "asha.dashboard.visitsLogged": "दर्ज की गई फील्ड विज़िट",
+
+    "hospital.dashboard.overview": "अस्पताल अवलोकन",
+    "hospital.dashboard.waitingToday": "आज कतार में प्रतीक्षारत",
+    "hospital.dashboard.pendingReferrals": "आने वाले लंबित रेफ़रल",
+    "hospital.dashboard.openFeedback": "खुली प्रतिक्रियाएं",
+
+    "lab.dashboard.title": "लैब जांच",
+    "lab.dashboard.noPendingOrders": "कोई लंबित जांच नहीं।",
+
+    "ambulance.dashboard.title": "एम्बुलेंस अनुरोध",
+
+    "admin.dashboard.title": "जिला अवलोकन",
+    "admin.dashboard.totalAppointments": "कुल अपॉइंटमेंट",
+    "admin.dashboard.pendingReferrals": "लंबित रेफ़रल",
+    "admin.dashboard.openAmbulanceRequests": "खुले एम्बुलेंस अनुरोध",
+    "admin.dashboard.openFeedback": "खुली प्रतिक्रियाएं",
+    "admin.dashboard.ashaWorkersOnboarded": "नामांकित आशा कार्यकर्ता",
+    "admin.dashboard.registeredPatients": "पंजीकृत मरीज़",
 
     "common.save": "सहेजें",
     "common.cancel": "रद्द करें",
@@ -346,6 +390,28 @@ export const dictionaries = {
     "queue.waiting": "રાહ જોઈ રહ્યાં છીએ",
     "queue.called": "તમને બોલાવવામાં આવી રહ્યા છે - કૃપા કરીને કાઉન્ટર પર જાઓ",
 
+    "asha.dashboard.overview": "આશા ઝાંખી",
+    "asha.dashboard.patientsRegistered": "તમે નોંધાવેલા દર્દીઓ",
+    "asha.dashboard.visitsLogged": "નોંધાયેલી ફિલ્ડ મુલાકાતો",
+
+    "hospital.dashboard.overview": "હોસ્પિટલ ઝાંખી",
+    "hospital.dashboard.waitingToday": "આજે કતારમાં રાહ જોઈ રહ્યા છે",
+    "hospital.dashboard.pendingReferrals": "આવતા બાકી રેફરલ",
+    "hospital.dashboard.openFeedback": "ખુલ્લા પ્રતિભાવ",
+
+    "lab.dashboard.title": "લેબ ઓર્ડર",
+    "lab.dashboard.noPendingOrders": "કોઈ બાકી ઓર્ડર નથી.",
+
+    "ambulance.dashboard.title": "એમ્બ્યુલન્સ વિનંતીઓ",
+
+    "admin.dashboard.title": "જિલ્લા ઝાંખી",
+    "admin.dashboard.totalAppointments": "કુલ મુલાકાતો",
+    "admin.dashboard.pendingReferrals": "બાકી રેફરલ",
+    "admin.dashboard.openAmbulanceRequests": "ખુલ્લી એમ્બ્યુલન્સ વિનંતીઓ",
+    "admin.dashboard.openFeedback": "ખુલ્લા પ્રતિભાવ",
+    "admin.dashboard.ashaWorkersOnboarded": "નોંધાયેલા આશા કાર્યકરો",
+    "admin.dashboard.registeredPatients": "નોંધાયેલા દર્દીઓ",
+
     "common.save": "સાચવો",
     "common.cancel": "રદ કરો",
     "common.submit": "સબમિટ કરો",
@@ -457,6 +523,28 @@ export const dictionaries = {
     "queue.yourToken": "तुमचा टोकन नंबर",
     "queue.waiting": "प्रतीक्षा करत आहे",
     "queue.called": "तुम्हाला बोलावले जात आहे - कृपया काउंटरवर जा",
+
+    "asha.dashboard.overview": "आशा आढावा",
+    "asha.dashboard.patientsRegistered": "तुम्ही नोंदणी केलेले रुग्ण",
+    "asha.dashboard.visitsLogged": "नोंदवलेल्या फील्ड भेटी",
+
+    "hospital.dashboard.overview": "रुग्णालय आढावा",
+    "hospital.dashboard.waitingToday": "आज रांगेत प्रतीक्षारत",
+    "hospital.dashboard.pendingReferrals": "येणारे प्रलंबित रेफरल",
+    "hospital.dashboard.openFeedback": "खुले अभिप्राय",
+
+    "lab.dashboard.title": "प्रयोगशाळा ऑर्डर",
+    "lab.dashboard.noPendingOrders": "कोणतीही प्रलंबित ऑर्डर नाही.",
+
+    "ambulance.dashboard.title": "रुग्णवाहिका विनंत्या",
+
+    "admin.dashboard.title": "जिल्हा आढावा",
+    "admin.dashboard.totalAppointments": "एकूण भेटी",
+    "admin.dashboard.pendingReferrals": "प्रलंबित रेफरल",
+    "admin.dashboard.openAmbulanceRequests": "खुल्या रुग्णवाहिका विनंत्या",
+    "admin.dashboard.openFeedback": "खुले अभिप्राय",
+    "admin.dashboard.ashaWorkersOnboarded": "नोंदणीकृत आशा कार्यकर्त्या",
+    "admin.dashboard.registeredPatients": "नोंदणीकृत रुग्ण",
 
     "common.save": "जतन करा",
     "common.cancel": "रद्द करा",
