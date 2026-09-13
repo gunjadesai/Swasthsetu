@@ -1,25 +1,53 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import Link from "next/link";
 import { login, type LoginState } from "./actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 const initialState: LoginState = {};
 
 export default function LoginPage() {
   const [state, formAction, pending] = useActionState(login, initialState);
+  // React 19 resets uncontrolled fields after a form action, which wiped
+  // the email on every failed sign-in. Holding it in state keeps it; the
+  // password still clears after a failed attempt, as it should.
+  const [email, setEmail] = useState("");
+
+  // Signing in inherently needs the network (Supabase auth has to be
+  // reached) - it can't be made to "work offline" like the ASHA
+  // field-visit queue. But without this check, submitting while
+  // offline let the Server Action's own fetch fail as an *uncaught*
+  // client-side exception ("Failed to fetch", with no error.tsx
+  // boundary to catch it) instead of a message the user can act on.
+  // Checking navigator.onLine before the form's action ever fires
+  // avoids attempting - and crashing on - a request we already know
+  // will fail.
+  const [offlineError, setOfflineError] = useState<string | null>(null);
+  const errorToShow = offlineError ?? state.error;
 
   return (
     <main className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-6 py-16">
+      <ThemeToggle variant="light" className="fixed right-4 top-4" />
       <h1 className="text-2xl font-semibold text-ink">Sign in</h1>
-      <p className="mt-1 text-sm text-ink/60">
+      <p className="mt-1 text-sm text-ink/70">
         Welcome back.
       </p>
 
-      <form action={formAction} className="mt-8 space-y-5">
+      <form
+        action={formAction}
+        onSubmit={(e) => {
+          setOfflineError(null);
+          if (!navigator.onLine) {
+            e.preventDefault();
+            setOfflineError("You're offline. Connect to the internet and try again.");
+          }
+        }}
+        className="mt-8 space-y-5"
+      >
         <div>
           <Label htmlFor="email">Email</Label>
           <Input
@@ -27,20 +55,30 @@ export default function LoginPage() {
             name="email"
             type="email"
             required
+            autoComplete="email"
             placeholder="you@example.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
           />
         </div>
         <div>
           <Label htmlFor="password">Password</Label>
-          <Input id="password" name="password" type="password" required />
+          <Input
+            id="password"
+            name="password"
+            type="password"
+            required
+            autoComplete="current-password"
+            autoFocus={Boolean(state.error)}
+          />
         </div>
 
-        {state.error && (
+        {errorToShow && (
           <p
             role="alert"
             className="rounded-md bg-danger/10 px-3 py-2 text-sm text-danger"
           >
-            {state.error}
+            {errorToShow}
           </p>
         )}
 
@@ -49,7 +87,7 @@ export default function LoginPage() {
         </Button>
       </form>
 
-      <p className="mt-6 text-sm text-ink/60">
+      <p className="mt-6 text-sm text-ink/70">
         New here?{" "}
         <Link href="/signup" className="font-medium text-teal-600">
           Create an account

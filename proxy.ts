@@ -4,7 +4,7 @@ import type { RoleName } from "@/lib/types";
 
 // Every role's own section and the dashboard it's redirected home to.
 // Keeping this as one map (instead of one if-block per role) is what
-// lets middleware stay flat as roles are added across Phases 2-6.
+// lets the proxy stay flat as roles are added across Phases 2-6.
 const ROLE_HOME: Record<RoleName, string> = {
   Patient: "/patient/dashboard",
   ASHAWorker: "/asha/dashboard",
@@ -27,7 +27,7 @@ const PROTECTED_PREFIXES = [
   "/admin",
 ];
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
 
   const supabase = createServerClient(

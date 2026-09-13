@@ -26,7 +26,7 @@ export default async function AshaTriagePage() {
   return (
     <div className="max-w-2xl">
       <h1 className="text-2xl font-semibold text-ink">Assisted symptom check</h1>
-      <p className="mt-1 text-sm text-ink/60">
+      <p className="mt-1 text-sm text-ink/70">
         Pick a patient you've registered, then walk through their symptoms.
       </p>
       <div className="mt-6">

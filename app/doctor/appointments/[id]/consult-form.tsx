@@ -6,6 +6,7 @@ import { completeConsult, type CompleteState } from "./actions";
 import { Button } from "@/components/ui/button";
 import { Input, Select, Textarea } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useOfflineFormGuard } from "@/lib/offline-sync/use-offline-guard";
 
 type Item = {
   medicineName: string;
@@ -37,6 +38,7 @@ export function ConsultForm({
     completeConsult,
     initialState
   );
+  const { offlineError, guardSubmit } = useOfflineFormGuard();
   const [items, setItems] = useState<Item[]>([{ ...emptyItem }]);
 
   function updateItem(i: number, field: keyof Item, value: string) {
@@ -61,7 +63,7 @@ export function ConsultForm({
   );
 
   return (
-    <form action={formAction} className="mt-6 space-y-5">
+    <form action={formAction} onSubmit={guardSubmit} className="mt-6 space-y-5">
       <input type="hidden" name="appointmentId" value={appointmentId} />
       <input type="hidden" name="itemsJson" value={itemsJson} />
 
@@ -138,7 +140,7 @@ export function ConsultForm({
                 <button
                   type="button"
                   onClick={() => removeItem(i)}
-                  className="text-ink/40 hover:text-danger"
+                  className="text-ink/70 hover:text-danger"
                   aria-label="Remove medicine"
                 >
                   <Trash2 className="h-4 w-4" />
@@ -191,12 +193,12 @@ export function ConsultForm({
         </div>
       </div>
 
-      {state.error && (
+      {(offlineError ?? state.error) && (
         <p
           role="alert"
           className="rounded-md bg-danger/10 px-3 py-2 text-sm text-danger"
         >
-          {state.error}
+          {offlineError ?? state.error}
         </p>
       )}
 

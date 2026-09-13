@@ -6,7 +6,7 @@ import { LOCALE_COOKIE, locales, type Locale } from "@/lib/i18n/dictionaries";
 import { useLocale, useTranslation } from "@/lib/i18n/locale-context";
 import { cn } from "@/lib/utils";
 
-const LABELS: Record<Locale, string> = { en: "EN", hi: "हि", gu: "ગુ" };
+const LABELS: Record<Locale, string> = { en: "EN", hi: "हि", gu: "ગુ", mr: "म" };
 
 export function LanguageSwitcher({
   className,

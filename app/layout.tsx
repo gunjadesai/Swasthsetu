@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
+import { cookies } from "next/headers";
 import { IBM_Plex_Sans, IBM_Plex_Sans_Devanagari } from "next/font/google";
 import { getLocale } from "@/lib/i18n/get-dictionary";
 import { LocaleProvider } from "@/lib/i18n/locale-context";
+import { THEME_COOKIE, THEME_INIT_SCRIPT, isThemePreference } from "@/lib/theme";
+import { ServiceWorkerRegistration } from "@/components/service-worker";
 import "./globals.css";
 
 // IBM Plex Sans: chosen partly because its Devanagari + other Indic
@@ -35,14 +38,25 @@ export default async function RootLayout({
   children: React.ReactNode;
 }) {
   const locale = await getLocale();
+  const themeCookie = (await cookies()).get(THEME_COOKIE)?.value;
+  // Explicit light/dark is rendered by the server; "system" is resolved
+  // by THEME_INIT_SCRIPT before first paint.
+  const theme = isThemePreference(themeCookie) ? themeCookie : "system";
 
   return (
     <html
       lang={locale}
-      className={`${plexSans.variable} ${plexSansDevanagari.variable}`}
+      className={`${plexSans.variable} ${plexSansDevanagari.variable}${theme === "dark" ? " dark" : ""}`}
+      data-theme-preference={theme}
+      // The init script may add "dark" before hydration.
+      suppressHydrationWarning
     >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+      </head>
       <body className="font-sans antialiased">
         <LocaleProvider locale={locale}>{children}</LocaleProvider>
+        <ServiceWorkerRegistration />
       </body>
     </html>
   );

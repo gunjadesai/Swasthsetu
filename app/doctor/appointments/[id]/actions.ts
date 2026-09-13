@@ -3,6 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
+import { encryptPHI } from "@/lib/phi-crypto";
+import { isMissingSchemaError } from "@/lib/supabase/schema-fallback";
 
 const itemSchema = z.object({
   medicineName: z.string().min(1),
@@ -62,109 +64,54 @@ export async function completeConsult(
   }
 
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  const { data: doctor } = await supabase
-    .from("doctors")
-    .select("doctor_id")
-    .eq("profile_id", user!.id)
-    .single();
-  if (!doctor) return { error: "Doctor profile not found." };
 
-  const { data: appointment } = await supabase
-    .from("appointments")
-    .select("appointment_id, patient_id, doctor_id, status")
-    .eq("appointment_id", parsed.data.appointmentId)
-    .single();
-
-  if (!appointment || appointment.doctor_id !== doctor.doctor_id) {
-    return { error: "Appointment not found." };
+  // Diagnosis, symptoms and notes are PHI - encrypted before storage.
+  let clinical: { diagnosis: string | null; symptoms: string | null; notes: string | null };
+  try {
+    clinical = {
+      diagnosis: encryptPHI(parsed.data.diagnosis),
+      symptoms: encryptPHI(parsed.data.symptoms),
+      notes: encryptPHI(parsed.data.notes),
+    };
+  } catch (e) {
+    return { error: e instanceof Error ? e.message : "Could not secure the consultation record." };
   }
 
-  const { data: record, error: recordError } = await supabase
-    .from("medical_records")
-    .insert({
-      patient_id: appointment.patient_id,
-      appointment_id: appointment.appointment_id,
-      doctor_id: doctor.doctor_id,
-      diagnosis: parsed.data.diagnosis ?? null,
-      symptoms: parsed.data.symptoms ?? null,
-      notes: parsed.data.notes ?? null,
-    })
-    .select("record_id")
-    .single();
+  // One round trip, one transaction (migration 005). The old version
+  // wrote the record, prescription, referral, lab order and appointment
+  // status as five independent calls, so a failure partway through left
+  // a half-saved consultation - an orphan record with no prescription,
+  // or a completed record on an appointment still marked Scheduled.
+  // record_consultation() checks that this doctor owns the appointment,
+  // so the ownership check that used to live here is gone with it.
+  const { data: recordId, error } = await supabase.rpc("record_consultation", {
+    p_appointment_id: parsed.data.appointmentId,
+    p_diagnosis: clinical.diagnosis,
+    p_symptoms: clinical.symptoms,
+    p_notes: clinical.notes,
+    p_items: items,
+    p_refer_hospital_id: parsed.data.referHospitalId ?? null,
+    p_refer_reason: parsed.data.referReason ?? null,
+    p_refer_urgency: parsed.data.referUrgency ?? "Normal",
+    p_lab_id: parsed.data.labId ?? null,
+    p_test_id: parsed.data.labTestId ?? null,
+  });
 
-  if (recordError || !record) {
-    return { error: recordError?.message ?? "Could not save the record." };
-  }
-
-  if (items.length > 0) {
-    const { data: prescription, error: prescriptionError } = await supabase
-      .from("prescriptions")
-      .insert({
-        record_id: record.record_id,
-        doctor_id: doctor.doctor_id,
-        patient_id: appointment.patient_id,
-      })
-      .select("prescription_id")
-      .single();
-
-    if (prescriptionError || !prescription) {
+  if (error) {
+    if (isMissingSchemaError(error)) {
       return {
-        error: prescriptionError?.message ?? "Could not save the prescription.",
+        error:
+          "Saving a consultation needs supabase/migrations/005_open_issue_fixes.sql - run it in the Supabase SQL Editor, then save again. Nothing has been recorded yet.",
       };
     }
-
-    const { error: itemsError } = await supabase.from("prescription_items").insert(
-      items.map((item) => ({
-        prescription_id: prescription.prescription_id,
-        medicine_name: item.medicineName,
-        dosage: item.dosage ?? null,
-        duration_days: item.durationDays ?? null,
-        instructions: item.instructions ?? null,
-      }))
-    );
-    if (itemsError) return { error: itemsError.message };
+    if (error.code === "42501") {
+      return { error: "Appointment not found, or your account isn't verified yet." };
+    }
+    return { error: error.message };
   }
+  if (!recordId) return { error: "Could not save the record." };
 
-  if (parsed.data.referHospitalId) {
-    const { data: doctorHospital } = await supabase
-      .from("doctors")
-      .select("primary_hospital_id")
-      .eq("doctor_id", doctor.doctor_id)
-      .single();
-
-    const { error: referralError } = await supabase.from("referrals").insert({
-      patient_id: appointment.patient_id,
-      referred_from_hospital_id: doctorHospital?.primary_hospital_id ?? null,
-      referred_to_hospital_id: parsed.data.referHospitalId,
-      referred_by_doctor_id: doctor.doctor_id,
-      reason: parsed.data.referReason ?? null,
-      urgency_level: parsed.data.referUrgency ?? "Normal",
-    });
-    if (referralError) return { error: referralError.message };
-  }
-
-  if (parsed.data.labId && parsed.data.labTestId) {
-    const { error: labOrderError } = await supabase.from("lab_test_orders").insert({
-      record_id: record.record_id,
-      patient_id: appointment.patient_id,
-      lab_id: parsed.data.labId,
-      test_id: parsed.data.labTestId,
-      ordered_by_doctor_id: doctor.doctor_id,
-    });
-    if (labOrderError) return { error: labOrderError.message };
-  }
-
-  const { error: statusError } = await supabase
-    .from("appointments")
-    .update({ status: "Completed" })
-    .eq("appointment_id", appointment.appointment_id);
-
-  if (statusError) return { error: statusError.message };
-
-  revalidatePath(`/doctor/appointments/${appointment.appointment_id}`);
+  revalidatePath(`/doctor/appointments/${parsed.data.appointmentId}`);
   revalidatePath("/doctor/appointments");
   revalidatePath("/doctor/dashboard");
   return {};

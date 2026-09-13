@@ -53,13 +53,13 @@ export function OrderRow({ order }: { order: Order }) {
   }
 
   return (
-    <div className="rounded-md border border-line bg-white p-3 text-sm">
+    <div className="rounded-md border border-line bg-surface p-3 text-sm">
       <div className="flex items-center justify-between">
         <div>
           <p className="font-medium text-ink">{order.patientName}</p>
-          <p className="text-ink/60">{order.testName}</p>
+          <p className="text-ink/70">{order.testName}</p>
         </div>
-        <span className="text-xs text-ink/50">{order.status}</span>
+        <span className="text-xs text-ink/70">{order.status}</span>
       </div>
 
       {order.status === "Ordered" && (

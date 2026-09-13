@@ -32,10 +32,10 @@ export default async function PatientFeedbackPage() {
           <h2 className="text-sm font-semibold text-ink">Your past feedback</h2>
           <div className="mt-3 space-y-2">
             {myFeedback.map((f) => (
-              <div key={f.feedback_id} className="rounded-md border border-line bg-white p-3 text-sm">
+              <div key={f.feedback_id} className="rounded-md border border-line bg-surface p-3 text-sm">
                 <div className="flex items-center justify-between">
                   <span className="font-medium text-ink">{f.category}</span>
-                  <span className="text-xs text-ink/50">{f.status}</span>
+                  <span className="text-xs text-ink/70">{f.status}</span>
                 </div>
                 {f.comments && <p className="mt-1 text-ink/70">{f.comments}</p>}
               </div>

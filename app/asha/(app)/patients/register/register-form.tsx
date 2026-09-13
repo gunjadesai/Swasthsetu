@@ -5,14 +5,16 @@ import { registerAssistedPatient, type RegisterPatientState } from "./actions";
 import { Button } from "@/components/ui/button";
 import { Input, Select } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useOfflineFormGuard } from "@/lib/offline-sync/use-offline-guard";
 
 const initialState: RegisterPatientState = {};
 
 export function RegisterPatientForm() {
   const [state, formAction, pending] = useActionState(registerAssistedPatient, initialState);
+  const { offlineError, guardSubmit } = useOfflineFormGuard();
 
   return (
-    <form action={formAction} className="max-w-md space-y-4">
+    <form action={formAction} onSubmit={guardSubmit} className="max-w-md space-y-4">
       <div>
         <Label htmlFor="fullName">Full name</Label>
         <Input id="fullName" name="fullName" required placeholder="Patient's full name" />
@@ -43,9 +45,9 @@ export function RegisterPatientForm() {
         <Input id="emergencyContact" name="emergencyContact" placeholder="Family member's phone" />
       </div>
 
-      {state.error && (
+      {(offlineError ?? state.error) && (
         <p role="alert" className="rounded-md bg-danger/10 px-3 py-2 text-sm text-danger">
-          {state.error}
+          {offlineError ?? state.error}
         </p>
       )}
       {state.success && (

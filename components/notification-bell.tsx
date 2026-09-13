@@ -23,9 +23,9 @@ export function NotificationBell({ reminders }: { reminders: ReminderRow[] }) {
         )}
       </button>
       {open && (
-        <div className="absolute right-0 top-full z-10 mt-1 w-72 rounded-md border border-line bg-white p-2 text-ink shadow-lg">
+        <div className="absolute right-0 top-full z-10 mt-1 w-72 rounded-md border border-line bg-surface p-2 text-ink shadow-lg">
           {reminders.length === 0 ? (
-            <p className="p-2 text-sm text-ink/50">No reminders.</p>
+            <p className="p-2 text-sm text-ink/70">No reminders.</p>
           ) : (
             reminders.map((r) => (
               <div key={r.reminder_id} className={cn("rounded-md p-2 text-sm hover:bg-sage-50")}>

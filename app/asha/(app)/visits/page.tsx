@@ -33,25 +33,25 @@ export default async function AshaVisitsPage() {
   return (
     <div className="max-w-3xl">
       <h1 className="text-2xl font-semibold text-ink">Field visits</h1>
-      <p className="mt-1 text-sm text-ink/60">
+      <p className="mt-1 text-sm text-ink/70">
         Works offline - visits logged with no signal are saved on this
         device and sync automatically once you're back online.
       </p>
 
       <div className="mt-6 grid gap-8 sm:grid-cols-[minmax(0,320px)_1fr]">
-        <VisitForm patients={patientRows} />
+        <VisitForm patients={patientRows} profileId={user!.id} />
 
         <div>
           <h2 className="text-sm font-semibold text-ink">Recent visits</h2>
           <div className="mt-3 space-y-2">
             {(visits ?? []).map((v) => (
-              <div key={v.visit_id} className="rounded-md border border-line bg-white p-3 text-sm">
+              <div key={v.visit_id} className="rounded-md border border-line bg-surface p-3 text-sm">
                 <div className="flex items-center justify-between">
                   <span className="font-medium text-ink">
                     {(v.patients as unknown as { profiles?: { full_name?: string } } | null)?.profiles
                       ?.full_name ?? "Patient"}
                   </span>
-                  <span className="text-xs text-ink/50">{v.visit_date}</span>
+                  <span className="text-xs text-ink/70">{v.visit_date}</span>
                 </div>
                 {v.purpose && <p className="mt-1 text-ink/70">{v.purpose}</p>}
                 {v.is_synced_from_offline && (
@@ -62,7 +62,7 @@ export default async function AshaVisitsPage() {
               </div>
             ))}
             {(!visits || visits.length === 0) && (
-              <p className="text-sm text-ink/50">No visits logged yet.</p>
+              <p className="text-sm text-ink/70">No visits logged yet.</p>
             )}
           </div>
         </div>

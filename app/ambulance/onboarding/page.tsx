@@ -23,7 +23,7 @@ export default async function AmbulanceOnboardingPage() {
   return (
     <main className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-6 py-16">
       <h1 className="text-2xl font-semibold text-ink">Register your ambulance</h1>
-      <p className="mt-1 text-sm text-ink/60">Tell us your vehicle and district.</p>
+      <p className="mt-1 text-sm text-ink/70">Tell us your vehicle and district.</p>
       <div className="mt-8">
         <OnboardingForm districts={districts ?? []} />
       </div>

@@ -3,6 +3,7 @@
 import { randomUUID } from "crypto";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { encryptPHI } from "@/lib/phi-crypto";
 
 export type RegisterPatientState = { error?: string; success?: boolean };
 
@@ -11,9 +12,10 @@ export type RegisterPatientState = { error?: string; success?: boolean };
 // a unique identifier per user, so a placeholder email is synthesized
 // from the phone number and a random password is generated - the
 // patient signs in later via a "forgot password" reset once they have
-// a device, or stays ASHA-mediated indefinitely. Documented prototype
-// simplification, same spirit as the existing "Confirm email off" one
-// in progress.md.
+// a device, or stays ASHA-mediated indefinitely (and can use the SMS,
+// USSD and IVR lines from a keypad phone, matched by this phone number).
+// Documented prototype simplification, same spirit as the existing
+// "Confirm email off" one in progress.md.
 export async function registerAssistedPatient(
   _prevState: RegisterPatientState,
   formData: FormData
@@ -29,6 +31,17 @@ export async function registerAssistedPatient(
     return { error: "Full name and phone number are required." };
   }
 
+  // Encrypt before creating anything, so a missing key can't leave a
+  // half-registered account behind.
+  let encryptedAddress: string | null;
+  let encryptedEmergencyContact: string | null;
+  try {
+    encryptedAddress = encryptPHI(address);
+    encryptedEmergencyContact = encryptPHI(emergencyContact);
+  } catch (e) {
+    return { error: e instanceof Error ? e.message : "Could not secure the patient's details." };
+  }
+
   const supabase = await createClient();
   const {
     data: { user },
@@ -42,6 +55,20 @@ export async function registerAssistedPatient(
     .single();
   if (!asha) {
     return { error: "Your ASHA profile isn't set up yet - finish onboarding first." };
+  }
+
+  // Registration runs with the service-role key below, which RLS can't
+  // gate - so the verification check has to happen here (migration 004).
+  const { data: me, error: meError } = await supabase
+    .from("profiles")
+    .select("verification_status")
+    .eq("id", user.id)
+    .single();
+  if (!meError && me && me.verification_status !== "Verified") {
+    return {
+      error:
+        "Your ASHA account is waiting for administrator verification - you can register patients once it's approved.",
+    };
   }
 
   const { data: roleRow } = await supabase
@@ -82,8 +109,8 @@ export async function registerAssistedPatient(
     profile_id: created.user.id,
     date_of_birth: dateOfBirth || null,
     gender: gender || null,
-    address: address || null,
-    emergency_contact: emergencyContact || null,
+    address: encryptedAddress,
+    emergency_contact: encryptedEmergencyContact,
     registered_by_asha_id: asha.asha_id,
   });
   if (patientError) return { error: patientError.message };

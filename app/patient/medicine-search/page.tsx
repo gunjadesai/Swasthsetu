@@ -40,9 +40,9 @@ export default async function MedicineSearchPage({
         {results
           .filter((r) => r.medicine_catalog)
           .map((r) => (
-            <div key={r.availability_id} className="rounded-md border border-line bg-white p-3 text-sm">
+            <div key={r.availability_id} className="rounded-md border border-line bg-surface p-3 text-sm">
               <p className="font-medium text-ink">{r.medicine_catalog?.medicine_name}</p>
-              <p className="text-ink/60">
+              <p className="text-ink/70">
                 {r.pharmacies?.name}
                 {r.pharmacies?.districts?.district_name ? ` - ${r.pharmacies.districts.district_name}` : ""}
               </p>
@@ -50,7 +50,7 @@ export default async function MedicineSearchPage({
             </div>
           ))}
         {q && results.length === 0 && (
-          <p className="text-sm text-ink/60">No pharmacy currently has that in stock.</p>
+          <p className="text-sm text-ink/70">No pharmacy currently has that in stock.</p>
         )}
       </div>
     </div>

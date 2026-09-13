@@ -38,21 +38,21 @@ export default async function PatientQueuePage() {
       <h1 className="text-2xl font-semibold text-ink">{t("queue.title")}</h1>
 
       {activeTicket ? (
-        <div className="mt-6 rounded-lg border border-line bg-white p-6">
-          <p className="text-sm text-ink/60">
+        <div className="mt-6 rounded-lg border border-line bg-surface p-6">
+          <p className="text-sm text-ink/70">
             {(activeTicket.hospitals as unknown as { name?: string } | null)?.name}
           </p>
           <p className="mt-2 text-4xl font-bold text-teal-600">
             #{activeTicket.token_number}
           </p>
-          <p className="mt-2 text-sm text-ink/60">{t("queue.yourToken")}</p>
+          <p className="mt-2 text-sm text-ink/70">{t("queue.yourToken")}</p>
           <span className="mt-3 inline-block rounded-full bg-sage-100 px-3 py-1 text-xs font-medium text-ink">
             {activeTicket.status === "Called" ? t("queue.called") : t("queue.waiting")}
           </span>
         </div>
       ) : (
         <div className="mt-6">
-          <p className="mb-4 text-sm text-ink/60">
+          <p className="mb-4 text-sm text-ink/70">
             No active token today - check in below to join the walk-in
             queue at a hospital or PHC.
           </p>

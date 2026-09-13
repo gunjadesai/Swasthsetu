@@ -5,6 +5,8 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { TeleconsultRoom } from "@/components/teleconsult-room";
+import { consultModeLabel, isRemoteConsult } from "@/lib/consult-mode";
+import { decryptPHI } from "@/lib/phi-crypto";
 import { cn } from "@/lib/utils";
 import { CancelAppointmentButton } from "./cancel-button";
 
@@ -80,9 +82,16 @@ export default async function PatientAppointmentsPage({
       .eq("patient_id", patient.patient_id),
   ]);
 
+  // Diagnosis and notes are stored encrypted (lib/phi-crypto.ts).
   const recordByAppointment = new Map<number, RecordWithPrescription>();
   (records ?? []).forEach((r) => {
-    if (r.appointment_id) recordByAppointment.set(r.appointment_id, r);
+    if (r.appointment_id) {
+      recordByAppointment.set(r.appointment_id, {
+        ...r,
+        diagnosis: decryptPHI(r.diagnosis),
+        notes: decryptPHI(r.notes),
+      });
+    }
   });
 
   return (
@@ -107,7 +116,7 @@ export default async function PatientAppointmentsPage({
               "px-3 py-2 text-sm font-medium",
               activeTab === tab
                 ? "border-b-2 border-teal-600 text-teal-700"
-                : "text-ink/60 hover:text-ink"
+                : "text-ink/70 hover:text-ink"
             )}
           >
             {tab === "Completed" ? "Completed consultations" : tab}
@@ -117,7 +126,7 @@ export default async function PatientAppointmentsPage({
 
       {!appointments || appointments.length === 0 ? (
         <Card className="mt-6 flex flex-col items-center justify-center py-10 text-center">
-          <p className="text-sm text-ink/60">
+          <p className="text-sm text-ink/70">
             {activeTab === "All"
               ? "No appointments yet."
               : `No ${activeTab.toLowerCase()} appointments.`}
@@ -137,9 +146,9 @@ export default async function PatientAppointmentsPage({
                     <p className="font-medium text-ink">
                       Dr. {doctor?.profiles?.full_name ?? "Unknown"}
                     </p>
-                    <p className="text-sm text-ink/60">
+                    <p className="text-sm text-ink/70">
                       {doctor?.specialization ?? "General"} ·{" "}
-                      {appt.mode === "Teleconsult" ? "Video consult" : "In person"}
+                      {consultModeLabel(appt.mode)}
                     </p>
                   </div>
                   <div className="text-right">
@@ -158,9 +167,12 @@ export default async function PatientAppointmentsPage({
                   </div>
                 </div>
 
-                {appt.status === "Scheduled" && appt.mode === "Teleconsult" && (
+                {appt.status === "Scheduled" && isRemoteConsult(appt.mode) && (
                   <div className="mt-4 border-t border-line pt-4">
-                    <TeleconsultRoom appointmentId={appt.appointment_id} />
+                    <TeleconsultRoom
+                      appointmentId={appt.appointment_id}
+                      mode={appt.mode === "VoiceConsult" ? "voice" : "video"}
+                    />
                   </div>
                 )}
 

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 import { LanguageSwitcher } from "@/components/language-switcher";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { useTranslation } from "@/lib/i18n/locale-context";
 import { cn } from "@/lib/utils";
 import { SignOutButton } from "./sign-out-button";
@@ -29,7 +30,7 @@ export function DashboardNav({
   const t = useTranslation();
 
   return (
-    <aside className="sticky top-0 flex h-screen w-60 shrink-0 flex-col bg-teal-700 text-white">
+    <aside className="sticky top-0 flex h-screen w-60 shrink-0 flex-col bg-nav text-white">
       <div className="shrink-0 flex items-start justify-between px-5 py-6">
         <div>
           <p className="text-sm font-semibold tracking-tight">{t("app.name")}</p>
@@ -65,8 +66,9 @@ export function DashboardNav({
 
       <div className="shrink-0 border-t border-white/10 px-5 py-4">
         <p className="truncate text-sm font-medium">{fullName}</p>
-        <div className="mt-2">
+        <div className="mt-2 flex items-center justify-between gap-2">
           <SignOutButton />
+          <ThemeToggle />
         </div>
       </div>
     </aside>

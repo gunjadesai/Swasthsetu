@@ -1,15 +1,18 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { isMissingSchemaError } from "@/lib/supabase/schema-fallback";
 
 export type CheckInState = { error?: string };
 
-// Token numbers are assigned as (today's max for this hospital) + 1.
-// Two people checking in at the same instant can race for the same
-// number - the UNIQUE (hospital_id, queue_date, token_number)
-// constraint in the migration catches that, and we retry a few times
-// rather than trusting a client-computed number (same reasoning as the
-// existing appointment-slot booking flow).
+type SupabaseClient = Awaited<ReturnType<typeof createClient>>;
+
+// Token numbers are allocated inside the database by
+// allocate_queue_token() (migration 004), under a lock per hospital and
+// day. The old app-side "today's max + 1" could never work for more than
+// one patient: RLS only lets a patient read their own tickets, so every
+// patient computed token 1 and hit the unique constraint.
 export async function checkInToQueue(
   _prevState: CheckInState,
   formData: FormData
@@ -23,10 +26,34 @@ export async function checkInToQueue(
   } = await supabase.auth.getUser();
   if (!user) return { error: "Not signed in." };
 
+  const { error } = await supabase.rpc("allocate_queue_token", { p_hospital_id: hospitalId });
+
+  if (!error) {
+    revalidatePath("/patient/queue");
+    return {};
+  }
+
+  if (isMissingSchemaError(error)) {
+    console.warn(
+      "[queue] allocate_queue_token() not found - run supabase/migrations/004_high_priority_fixes.sql. Using the legacy check-in, which only works for the first patient of the day."
+    );
+    return legacyCheckIn(supabase, user.id, hospitalId);
+  }
+
+  return { error: error.message };
+}
+
+// Pre-migration-004 behaviour, kept only so check-in doesn't break
+// outright before the migration has been run.
+async function legacyCheckIn(
+  supabase: SupabaseClient,
+  profileId: string,
+  hospitalId: number
+): Promise<CheckInState> {
   const { data: patient } = await supabase
     .from("patients")
     .select("patient_id")
-    .eq("profile_id", user.id)
+    .eq("profile_id", profileId)
     .single();
   if (!patient) return { error: "Patient profile not found." };
 
@@ -50,11 +77,13 @@ export async function checkInToQueue(
       token_number: nextToken,
     });
 
-    if (!error) return {};
+    if (!error) {
+      revalidatePath("/patient/queue");
+      return {};
+    }
     if (!error.message.includes("duplicate key")) {
       return { error: error.message };
     }
-    // duplicate token_number race - loop and retry with a fresh max
   }
 
   return { error: "Queue is busy right now - please try checking in again." };

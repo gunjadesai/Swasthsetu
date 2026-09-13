@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { getDictionary } from "@/lib/i18n/get-dictionary";
 import { OrderRow } from "./order-row";
 
 export default async function LabDashboardPage() {
@@ -29,15 +30,16 @@ export default async function LabDashboardPage() {
   }));
 
   const labName = (staff?.laboratories as unknown as { name?: string } | null)?.name;
+  const t = await getDictionary();
 
   return (
     <div className="max-w-2xl">
-      <h1 className="text-2xl font-semibold text-ink">{labName ?? "Lab orders"}</h1>
+      <h1 className="text-2xl font-semibold text-ink">{labName ?? t("lab.dashboard.title")}</h1>
       <div className="mt-6 space-y-2">
         {rows.map((o) => (
           <OrderRow key={o.order_id} order={o} />
         ))}
-        {rows.length === 0 && <p className="text-sm text-ink/50">No pending orders.</p>}
+        {rows.length === 0 && <p className="text-sm text-ink/70">{t("lab.dashboard.noPendingOrders")}</p>}
       </div>
     </div>
   );

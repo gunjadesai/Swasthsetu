@@ -1,29 +1,8 @@
 import { Home, CalendarClock, Clock, User } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { DashboardNav, type NavItem } from "@/components/nav/dashboard-nav";
-
-const items: NavItem[] = [
-  {
-    href: "/doctor/dashboard",
-    label: "Overview",
-    icon: <Home className="h-4 w-4" />,
-  },
-  {
-    href: "/doctor/appointments",
-    label: "Appointments",
-    icon: <CalendarClock className="h-4 w-4" />,
-  },
-  {
-    href: "/doctor/availability",
-    label: "Availability",
-    icon: <Clock className="h-4 w-4" />,
-  },
-  {
-    href: "/doctor/profile",
-    label: "My profile",
-    icon: <User className="h-4 w-4" />,
-  },
-];
+import { getDictionary } from "@/lib/i18n/get-dictionary";
+import { VerificationBanner } from "@/components/verification-banner";
 
 export default async function DoctorLayout({
   children,
@@ -40,6 +19,33 @@ export default async function DoctorLayout({
     .eq("id", user!.id)
     .single();
 
+  const t = await getDictionary();
+
+  const items: NavItem[] = [
+    {
+      href: "/doctor/dashboard",
+      label: t("nav.dashboard"),
+      icon: <Home className="h-4 w-4" />,
+    },
+    {
+      href: "/doctor/appointments",
+      label: t("nav.appointments"),
+      icon: <CalendarClock className="h-4 w-4" />,
+    },
+    {
+      href: "/doctor/availability",
+      label: t("nav.availability"),
+      icon: <Clock className="h-4 w-4" />,
+    },
+    {
+      href: "/doctor/profile",
+      label: t("nav.profile"),
+      icon: <User className="h-4 w-4" />,
+    },
+  ];
+
+
+
   return (
     <div className="flex">
       <DashboardNav
@@ -50,6 +56,7 @@ export default async function DoctorLayout({
         }
       />
       <main className="min-h-screen flex-1 bg-sage-50 px-8 py-8">
+        <VerificationBanner />
         {children}
       </main>
     </div>
